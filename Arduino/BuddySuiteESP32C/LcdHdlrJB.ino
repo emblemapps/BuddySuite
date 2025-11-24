@@ -61,11 +61,13 @@ void JB_LcdHdlr::updateScreen(CurrentValuesJB & values)
 	setDjuiceRequiredField(values);
 	setDRatField 					(values);
 	setPgRatField					(values);
+	tft.setTextColor(colorText2, colorTextBG); 
 	setPgMlOrVgMlField    (values, true);
 	setPgMlOrVgMlField    (values, false);
 	setDeemsMgField       (values);
 	tft.setTextColor(ST77XX_CYAN, colorTextBG);
-	setSolubilityField    (values);
+	setSolubilityField     (values);
+	setTotalJuiceGramsField(values);
 }
 void JB_LcdHdlr::setSelectedField(uint8_t sel){} //0-dJuice Reqd, 1-dRatio g/ml, 2-PG/VG, 3-DMT
 void JB_LcdHdlr::setJoystickMeter(uint16_t & rawXPos){}  //0-4096
@@ -115,12 +117,21 @@ void JB_LcdHdlr::setJoystickMeter(uint16_t & rawXPos){}  //0-4096
 		void JB_LcdHdlr::setPgMlOrVgMlField(CurrentValuesJB & values, boolean PG)
 		{
 			uint8_t yOffset = 135;  if (!PG) {yOffset = 165;}
-			uint8_t xOffset = 95;
+			uint16_t xOffset = 95;
 			
 			float ml = (PG? values.pgMl:values.vgMl );
 			String MlStr = String(ml,2); 
 			tft.setCursor(xOffset, yOffset); tft.print(MlStr);
-		}		 
+			//////////////////////////////////////////////////
+			float gWeight = (PG?ml*1.036:ml*1.261);
+    	String gStr;
+    	if(gWeight<10){gStr  =String(gWeight,2);}
+    	else    			{gStr  =String(gWeight,1);}
+			xOffset = 297;
+			tft.setCursor(xOffset, yOffset);
+			uint16_t strLenPixels = getStringWidthPixels(&Open_Sans_Italic_23,gStr);
+  		tft.setCursor(xOffset-strLenPixels-3, yOffset); 	tft.print(gStr);    
+	}		 
 		
 		void JB_LcdHdlr::setDeemsMgField(const CurrentValuesJB & values)
 		{
@@ -163,10 +174,14 @@ void JB_LcdHdlr::setJoystickMeter(uint16_t & rawXPos){}  //0-4096
   display.setCursor(41, 57);
   display.print(buffer); 
 			 */
-		}	
-		
-		
-void JB_LcdHdlr::setTotalJuiceGramsField(float totalWeightOfDJuice_g){}		
+ 		}	
+void JB_LcdHdlr::setTotalJuiceGramsField(const CurrentValuesJB & values)
+{
+	uint8_t yOffset = 225; uint8_t xOffset = 12;
+	float totalWeightOfDJuice_g = values.totalWeightOfDJuice_g;
+	String out= String("Total     ") + String(totalWeightOfDJuice_g,(totalWeightOfDJuice_g>=10?1:2)) + String("g");
+  tft.setCursor(xOffset, yOffset); 	tft.print(out);
+}		
 
 void drawBitMap()
 {
@@ -178,8 +193,6 @@ void drawBitMap()
 	delay (10000);
 	tft.fillScreen(ST77XX_BLACK);
 	//tft.drawRGBBitmap(0, 0, lcd_gs850, 320,215);
-	               
-	
 	/**Many more drawbitmap functs in Adafruit_gfx.h
 	void drawRGBBitmap(int16_t x, int16_t y, const uint16_t bitmap[], int16_t w, int16_t h);
   void drawRGBBitmap(int16_t x, int16_t y, uint16_t *bitmap, int16_t w, int16_t h);
