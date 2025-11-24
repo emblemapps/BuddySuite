@@ -1,12 +1,11 @@
 
 #include <BuddySuiteESP32C3.h>
-#include <./Pics/picMinty.h>
-#include <./Pics/picDestiny.h>
-#include <./Pics/GS850_320x215.h>
+//#include <./Pics/picMinty.h>
+//#include <./Pics/picDestiny.h>
+//#include <./Pics/GS850_320x215.h>
 #include <./fonts/Open_Sans_Italic_21.h> 
 #include <./fonts/Open_Sans_Italic_16.h> 
 #include <./fonts/Open_Sans_Italic_23.h> 
-
 
 #define TFT_CS        21
 #define TFT_RST        9 // Or set to -1 and connect to Arduino RESET pin
@@ -15,8 +14,6 @@
 // gpio4 is sck  (SCL on display)
 //For all connections, see "Utils" tab
   
-
-//Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
 Utils utils;
 CurrentValuesJB valuesJB;
 JB_Calc jb_calc;
