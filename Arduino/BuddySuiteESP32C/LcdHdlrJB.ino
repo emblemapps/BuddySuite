@@ -11,10 +11,10 @@
 #include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
 #include <SPI.h>
 Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);  
+//Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
 
 void JB_LcdHdlr::setupScreen()
-		{
-			  
+		{		  
 				tft.fillScreen(colorTextBG);
 				//////////////////////////////////////////////////////////////////////////////////
 				tft.drawRoundRect(0, 0, tft.width(), tft.height()-135, 10, colorText1);
@@ -37,14 +37,14 @@ void JB_LcdHdlr::setupScreen()
   			yOffset+=lineSpacing;
   			tft.setCursor(xMargin, yOffset); tft.print("DMT");tft.setCursor(150, yOffset);tft.print("mg");
 				yOffset+=lineSpacing;
-  			tft.setCursor(242, yOffset); tft.print(("oluble"));
+				tft.setTextColor(ST77XX_CYAN, colorTextBG);
+  			tft.setCursor(235, yOffset); tft.print(("oluble"));
 		}
 
 void JB_LcdHdlr::setup()
 {
 	tft.init(240, 320);            			//2.0" 320x240 ST7789 TFT
 	tft.setFont(&Open_Sans_Italic_23); 	// https://oleddisplay.squix.ch/
-	setPiss(&Open_Sans_Italic_23,"Hello mate");
 	tft.setRotation(1);
 
   setupScreen();
@@ -64,6 +64,7 @@ void JB_LcdHdlr::updateScreen(CurrentValuesJB & values)
 	setPgMlOrVgMlField    (values, true);
 	setPgMlOrVgMlField    (values, false);
 	setDeemsMgField       (values);
+	tft.setTextColor(ST77XX_CYAN, colorTextBG);
 	setSolubilityField    (values);
 }
 void JB_LcdHdlr::setSelectedField(uint8_t sel){} //0-dJuice Reqd, 1-dRatio g/ml, 2-PG/VG, 3-DMT
@@ -131,20 +132,22 @@ void JB_LcdHdlr::setJoystickMeter(uint16_t & rawXPos){}  //0-4096
 		}
 		void JB_LcdHdlr::setSolubilityField(const CurrentValuesJB & values)
 		{
-			uint8_t yOffset = 225; uint8_t xOffset = 190;
-			 Solubility solubility = values.solubility;
-			//fsolubility=NOT_SOLUBLE;
+			uint8_t yOffset = 225; uint8_t xOffset = 235;//xoffset is for the "oluble" printed at setupscreen()
+			Solubility solubility = values.solubility;
+			//solubility=NOT_SOLUBLE;
 			String solStr = "S"; String upperLineString = "      ";
 			switch(solubility)
   		{
-    		case PART_SOLUBLE:  upperLineString = "Quasi-";  break;
-    		case SOLUBLE:       break;
-    		case NOT_SOLUBLE:   solStr = "Ins";    break;
-    		default:            break;
+    		case PART_SOLUBLE:  upperLineString = "Quasi-"; break;
+    		case SOLUBLE:       														break;
+    		case NOT_SOLUBLE:   solStr = "Ins";    					break;
+    		default:            														break;
   		}	
-  		 utils.rightJustifyPad(solStr,6);
-  		 tft.setCursor(xOffset, yOffset); tft.print(solStr); 
-  		 
+  		 //utils.rightJustifyPad(solStr,6);
+  		 uint16_t strLenPixels = getStringWidthPixels(&Open_Sans_Italic_23,solStr);
+  		 //tft.drawRect (242-strLenPixels, yOffset-23,strLenPixels, 23, ST77XX_RED );
+  		 tft.setCursor(xOffset-strLenPixels, yOffset); 	tft.print(solStr); 
+  		 tft.setCursor(xOffset-5, yOffset-30); 					tft.print(upperLineString); 
   		
 			/**
 			 *
@@ -163,30 +166,24 @@ void JB_LcdHdlr::setJoystickMeter(uint16_t & rawXPos){}  //0-4096
 		}	
 		
 		
-		void JB_LcdHdlr::setTotalJuiceGramsField(float totalWeightOfDJuice_g){}		
+void JB_LcdHdlr::setTotalJuiceGramsField(float totalWeightOfDJuice_g){}		
 
 void drawBitMap()
 {
 	tft.fillScreen(ST77XX_BLACK);
-	tft.drawRGBBitmap(0, 0, bitmap_Minty320_170, 320,170);
+	//tft.drawRGBBitmap(0, 0, bitmap_Minty320_170, 320,170);
 	delay (10000);
 	tft.fillScreen(ST77XX_BLACK);
-	tft.drawRGBBitmap(0, 0, bitmap_DestinyVideo320_170, 320,170);
+	//tft.drawRGBBitmap(0, 0, bitmap_DestinyVideo320_170, 320,170);
 	delay (10000);
 	tft.fillScreen(ST77XX_BLACK);
-	tft.drawRGBBitmap(0, 0, lcd_gs850, 320,215);
+	//tft.drawRGBBitmap(0, 0, lcd_gs850, 320,215);
+	               
 	
-	//tft.drawRGBBitmap(0, 0, lcd_bitmap, 128,64);
-                     
-	
-	/**Many more in Adafruit_gfx.h
-	 * void drawRGBBitmap(int16_t x, int16_t y, const uint16_t bitmap[], int16_t w,
-                     int16_t h);
-  void drawRGBBitmap(int16_t x, int16_t y, uint16_t *bitmap, int16_t w,
-                     int16_t h);
-  void drawRGBBitmap(int16_t x, int16_t y, const uint16_t bitmap[],
-                     const uint8_t mask[], int16_t w, int16_t h);
-  void drawRGBBitmap(int16_t x, int16_t y, uint16_t *bitmap, uint8_t *mask,
-                     int16_t w, int16_t h);
-                     */
+	/**Many more drawbitmap functs in Adafruit_gfx.h
+	void drawRGBBitmap(int16_t x, int16_t y, const uint16_t bitmap[], int16_t w, int16_t h);
+  void drawRGBBitmap(int16_t x, int16_t y, uint16_t *bitmap, int16_t w, int16_t h);
+  void drawRGBBitmap(int16_t x, int16_t y, const uint16_t bitmap[], const uint8_t mask[], int16_t w, int16_t h);
+  void drawRGBBitmap(int16_t x, int16_t y, uint16_t *bitmap, uint8_t *mask, int16_t w, int16_t h);
+   */
 }
