@@ -26,47 +26,36 @@
   mlStr = spaces + mlStr;
  }
 
-//Adafruit_GFX.cpp
- void setPiss(const GFXfont *f, String test) 
+/**
+ * adapted from code in Adafruit_GFX.cpp
+ */
+ uint16_t getStringWidthPixels(const GFXfont *f, const String & strInput) 
  {
-  GFXfont * gfxFont = (GFXfont *)f;
-//  unsigned char c='e';
-//  c -= (uint8_t)pgm_read_byte(&gfxFont->first);
-//  //GFXglyph *glyph = pgm_read_glyph_ptr(gfxFont, c);
-//  GFXglyph *glyph  = gfxFont->glyph + c;
-//	uint16_t yo = pgm_read_byte(&glyph->xAdvance);
+ 	GFXfont * gfxFont = (GFXfont *)f;
+	char char_array[strInput.length() + 1];
+	strInput.toCharArray(char_array, strInput.length()+1);
 
-	//Serial.println( ((char)c) + String(" xAdvance=") + String(yo));
-
-	// Length (with one extra character for the null terminator)
-
-//String testStr="abcd";
-char char_array[test.length() + 1];
-test.toCharArray(char_array, test.length()+1);
-
-for (uint8_t idx=0; idx<test.length(); ++idx)
-{
-	unsigned char c= char_array[idx];
-  c -= (uint8_t)pgm_read_byte(&gfxFont->first);
-  GFXglyph *glyph  = gfxFont->glyph + c;
-	uint16_t yo = pgm_read_byte(&glyph->xAdvance);
-
-	//Serial.println( ((char)c) + String(" xAdvance=") + String(yo));
-	Serial.println( ((char)char_array[idx])  + String("=") + String(yo));
-}
+	uint16_t pixelLengthCount = 0;
+	for (uint8_t idx=0; idx<strInput.length(); ++idx)
+		{
+			unsigned char currentChar = char_array[idx];
+  		currentChar -= (uint8_t)pgm_read_byte(&gfxFont->first);
+  		GFXglyph *glyph  = gfxFont->glyph + currentChar;
+			uint16_t pixelWidthCurrent = pgm_read_byte(&glyph->xAdvance);
+			pixelLengthCount+=pixelWidthCurrent;
+			Serial.println(((char)char_array[idx])  + String("=") + String(pixelWidthCurrent)+ String(", total pixels so far=") + String(pixelLengthCount));
+		}
+		return pixelLengthCount;
+ }
   
 
   /**
-   * c -= (uint8_t)pgm_read_byte(&gfxFont->first);
+   * Also for reading glyphs struct .....
     GFXglyph *glyph = pgm_read_glyph_ptr(gfxFont, c);
     uint8_t *bitmap = pgm_read_bitmap_ptr(gfxFont);
-
     uint16_t bo = pgm_read_word(&glyph->bitmapOffset);
-    uint8_t w = pgm_read_byte(&glyph->width), h = pgm_read_byte(&glyph->height);
-    int8_t xo = pgm_read_byte(&glyph->xOffset),
-           yo = pgm_read_byte(&glyph->yOffset);
-	   // &glyph->xAdvance	xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx   
-    uint8_t xx, yy, bits = 0, bit = 0;
-    int16_t xo16 = 0, yo16 = 0;
+    uint8_t w 	= pgm_read_byte(&glyph->width), h = pgm_read_byte(&glyph->height);
+    int8_t xo 	= pgm_read_byte(&glyph->xOffset),
+    int8_t yo  = pgm_read_byte(&glyph->yOffset);
    */
- }
+ 
