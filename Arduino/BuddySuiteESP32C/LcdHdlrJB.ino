@@ -1,257 +1,217 @@
-
-#include <BuddySuiteESP32C3.h>
-//#include <./Pics/picMinty.h>
-//#include <./Pics/picDestiny.h>
-//#include <./Pics/GS850_320x215.h>
-#include <./fonts/Open_Sans_Italic_21.h> 
-#include <./fonts/Open_Sans_Italic_16.h> 
-#include <./fonts/Open_Sans_Italic_23.h> 
-
-#define TFT_CS        21
-#define TFT_RST        9 // Or set to -1 and connect to Arduino RESET pin
-#define TFT_DC         10
-// gpio6 is mosi (SDA on display)
-// gpio4 is sck  (SCL on display)
-//For all connections, see "Utils" tab
-  
-Utils utils;
-CurrentValuesJB valuesJB;
-JB_Calc jb_calc;
-JB_LcdHdlr jb_lcdHandler;
-
-
-void setup() {
-  Serial.begin(115200);
-  Serial.println("here1");
-  jb_lcdHandler.setup();
-  jb_calc.setup();
-  valuesJB.setup();
-  jb_calc.calculate(valuesJB, false);
-  jb_lcdHandler.updateScreen(valuesJB);
- 
+  //tft.init(320, 240);           //1.3" or 1.54" 240x240 ST7789 TFT:
+  //tft.init(240, 280);           //1.69" 280x240 ST7789 TFT:
+  //tft.init(135, 240);           //       ST7789 240x135
+  //tft.init(172, 320);           // 1.47" 172x320 ST7789 TFT:
+  //tft.init(170, 320);           // 1.9"  170x320 ST7789 TFT
   // SPI speed defaults to SPI_DEFAULT_FREQ defined in the library, you can override it here
   // Allowable spped depends on chip & wiring Too fast may get you a black screen some times, continuous.
   //tft.setSPISpeed(40000000);
-  //delay(5000);
-}
+  
+#include <Adafruit_GFX.h>    // Core graphics library
+#include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
+#include <SPI.h>
+Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);  
+//Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
 
-void printValues()
+void JB_LcdHdlr::setupScreen()
+		{		  
+				tft.fillScreen(colorTextBG);
+				//////////////////////////////////////////////////////////////////////////////////
+				tft.drawRoundRect(0, 0, 	tft.width(), tft.height()-135, 10, colorText1);  //border line top
+				tft.drawRoundRect(0, 108, tft.width(), tft.height()-110, 10, colorText2);//border line botton
+		  	//////////////////////////////////////////////////////////////////////////////////
+				uint8_t yOffset = 30; // uint8_t lineSpacing=30;uint8_t xMarginLeftPixels = 12;
+				tft.setTextColor(colorText1, colorTextBG);
+				tft.setCursor(xMarginLeftPixels, yOffset); tft.print("dJuice Req'd");  
+				
+				uint16_t strLenPixels = getStringWidthPixels(&Open_Sans_Italic_23, mlStr);
+				tft.setCursor(tft.width() - strLenPixels - xMarginRightPixels, yOffset);
+				tft.print(mlStr);  
+				
+				//tft.setCursor(281 , yOffset); 	
+				
+				yOffset+=lineSpacing;
+				tft.setCursor(xMarginLeftPixels, yOffset); tft.print("dRatio g/ml");
+				yOffset+=lineSpacing;
+				tft.setCursor(xMarginLeftPixels, yOffset); tft.print("PG/VG");
+				/////////////////////////////////////////////////////////////////////////////////////////////////
+				tft.setTextColor(colorText2, colorTextBG); 
+				yOffset+=lineSpacing+15;
+  			tft.setCursor(xMarginLeftPixels, yOffset); tft.print("PG") ; tft.setCursor(xOffsetMl, yOffset); tft.print("ml"); tft.setCursor(297, yOffset); tft.print("g");
+  			yOffset+=lineSpacing;
+  			tft.setCursor(xMarginLeftPixels, yOffset); tft.print("VG") ; tft.setCursor(xOffsetMl, yOffset); tft.print("ml"); tft.setCursor(297, yOffset); tft.print("g");
+  			yOffset+=lineSpacing;
+  			tft.setCursor(xMarginLeftPixels, yOffset); tft.print("DMT"); tft.setCursor(xOffsetMg, yOffset); tft.print("mg");
+				yOffset+=lineSpacing;
+
+				tft.setTextColor(ST77XX_CYAN, colorTextBG); 
+  			tft.setCursor(xMarginLeftPixels, yOffset); 	tft.print("Total");  
+  			tft.setCursor(xOffsetMg, yOffset);					tft.print("g");
+  			olubleStrLenPixels = getStringWidthPixels(&Open_Sans_Italic_23, olubleStr);
+  			tft.setCursor(tft.width() - xMarginRightPixels - olubleStrLenPixels, yOffset); tft.print(olubleStr);
+		}
+
+void JB_LcdHdlr::setup()
 {
-	Serial.println (String("TotalJuice Reqd=") + String(valuesJB.getTojMl()));
-	Serial.println (String("Deems Ratio=1:") + String(valuesJB.deemsRatio));
-  Serial.println (String("PG/VG=")+ String(valuesJB.pgRatio) + String("/") 		+ String ((100-valuesJB.pgRatio)));
-  Serial.println (String("PG=") 	+ String(valuesJB.pgMl) 	 + String(", (") 	+ String (valuesJB.weightPg_g) + String("g)"));
-  Serial.println (String("VG=") 	+ String(valuesJB.vgMl) 	 + String(", (") 	+ String (valuesJB.weightVg_g) + String("g)"));
-  Serial.println (String("Total juice Weight=") + String(valuesJB.totalWeightOfDJuice_g));
-  Serial.println (String("Solubility=") + String(valuesJB.solubility));
-}
+	tft.init(240, 320);            			//2.0" 320x240 ST7789 TFT
+	tft.setFont(&Open_Sans_Italic_23); 	// https://oleddisplay.squix.ch/
+	tft.setRotation(1);
+  setupScreen();
+}	
 
-void loop() 
+void JB_LcdHdlr::updateScreen(CurrentValuesJB & values)  
 {
-	test();
-  delay(5000);
+	tft.setTextColor(colorText1, colorTextBG);
+	setDjuiceRequiredField (values);
+	setDRatField 					 (values);
+	setPgRatField					 (values);
+	tft.setTextColor(colorText2, colorTextBG); 
+	setPgMlOrVgMlField     (values, true);
+	setPgMlOrVgMlField     (values, false);
+	setDeemsMgField        (values);
+	tft.setTextColor(ST77XX_CYAN, colorTextBG);
+	setSolubilityField     (values);
+	setTotalJuiceGramsField(values);
 }
+void JB_LcdHdlr::setSelectedField(uint8_t sel){} //0-dJuice Reqd, 1-dRatio g/ml, 2-PG/VG, 3-DMT
+void JB_LcdHdlr::setJoystickMeter(uint16_t & rawXPos){}  //0-4096
+	
+void JB_LcdHdlr::setDjuiceRequiredField(CurrentValuesJB & values)
+	{
+			if (oldTojMl == values.getTojMl()) {return;}   //return if this field isn't being changed, saves display flicker
+			uint8_t yOffset = 30;  
+			float needed = values.getTojMl();
+			oldTojMl = needed;
+			String outStr = String(needed,1); //"0.1" "9.3" "20.8"	
+			
+			uint16_t outStrLenPixels = getStringWidthPixels(&Open_Sans_Italic_23, outStr);
+			uint16_t mlStrLenPixels  = getStringWidthPixels(&Open_Sans_Italic_23,  mlStr);
+			//                               1.7                 gap                ml                  gap
 
-void test()
+			//tft.fillRect (tft.width() - outStrLenPixels - textToUnitGapPixels - mlStrLenPixels  - xMarginRightPixels-10, yOffset-21, 60, 24, colorTextBG );
+			uint8_t rectXlen = 57;
+			tft.fillRect (tft.width() - textToUnitGapPixels - mlStrLenPixels  - xMarginRightPixels- rectXlen, yOffset-21, rectXlen, 24, colorTextBG );
+			tft.setCursor(tft.width() - outStrLenPixels - textToUnitGapPixels - mlStrLenPixels  - xMarginRightPixels, yOffset);
+			tft.print(outStr);  
+	}
+		
+		void JB_LcdHdlr::setDRatField(CurrentValuesJB & values)
+		{
+
+			if(oldDeemsRatio==values.deemsRatio){return;}
+			oldDeemsRatio 	= values.deemsRatio;
+			uint8_t yOffset = 60;  uint8_t xOffset=245;
+			uint8_t dRatX10 = values.deemsRatio * 10;
+			uint8_t prefix=1;
+     	if(dRatX10<10)
+     	{
+       	prefix=2;
+       	dRatX10 = dRatX10 *2;
+     	} 
+		 	uint8_t 	digit1 = (dRatX10/10);
+     	uint8_t 	digit2 = dRatX10 - (digit1*10);
+     	String 		outStr = String(prefix) + String(":")+ String(digit1) + String(".") + String(digit2);	
+			uint16_t 	outStrLenPixels = getStringWidthPixels(&Open_Sans_Italic_23, outStr);
+     	uint8_t 	rectXlen = 70;
+     	tft.fillRect (tft.width() - xMarginRightPixels - rectXlen, yOffset-21, rectXlen, 24, colorTextBG ); // ST77XX_BLACK colorTextBG
+			tft.setCursor(tft.width() - outStrLenPixels - xMarginRightPixels, yOffset);
+			tft.print(outStr);  
+		}
+		
+		void JB_LcdHdlr::setPgRatField(CurrentValuesJB & values)
+		{
+			if(oldPgRatio==values.pgRatio){return;} //return if this display isn't being changed.  Saves flicker.
+			oldPgRatio=values.pgRatio;
+			uint8_t yOffset = 90;  
+			uint8_t pgPerc 	= values.pgRatio;
+			uint8_t vgPerc 	= 100-pgPerc;
+      String outStr = String(pgPerc) + ('/') + String(vgPerc);  
+      uint16_t 	outStrLenPixels = getStringWidthPixels(&Open_Sans_Italic_23, outStr);	
+      uint8_t 	rectXlen = 70;
+     	tft.fillRect (tft.width() - xMarginRightPixels - rectXlen, yOffset-21, rectXlen, 24, colorTextBG); // ST77XX_RED colorTextBG
+      tft.setCursor(tft.width() - outStrLenPixels - xMarginRightPixels, yOffset);
+			tft.print(outStr);	
+		}
+		
+		void JB_LcdHdlr::setPgMlOrVgMlField(CurrentValuesJB & values, boolean PG)
+		{
+			uint8_t yOffset = 135;  if (!PG) {yOffset = 165;}
+			uint16_t xOffset = 95;
+			
+			float ml = (PG? values.pgMl:values.vgMl );
+			String MlStr = String(ml,2); 
+			tft.setCursor(xOffset, yOffset); tft.print(MlStr);
+			//////////////////////////////////////////////////
+			float gWeight = (PG?ml*1.036:ml*1.261);
+    	String gStr;
+    	if(gWeight<10){gStr  =String(gWeight,2);}
+    	else    			{gStr  =String(gWeight,1);}
+			xOffset = 297;
+			//tft.setCursor(xOffset, yOffset);
+			uint16_t strLenPixels = getStringWidthPixels(&Open_Sans_Italic_23,gStr);
+  		tft.setCursor(xOffset-strLenPixels-5, yOffset); 	tft.print(gStr);    
+		}		 
+		
+		void JB_LcdHdlr::setDeemsMgField(const CurrentValuesJB & values)
+		{
+			if(oldDeemsMg==values.deemsMg){return;}  //return if this display isn't being changed.  Saves flicker.
+			oldDeemsMg = values.deemsMg;
+			uint8_t 	yOffset = 195;
+			uint16_t  deemsMg = values.deemsMg;
+			String 		mgDeems = String(deemsMg);
+			uint16_t 	strLenPixels = getStringWidthPixels(&Open_Sans_Italic_23,mgDeems);
+			uint8_t 	rectXlen = 70;
+			tft.fillRect (xOffsetMg - rectXlen-textToUnitGapPixels,		  yOffset-21, rectXlen, 24, colorTextBG); //ST77XX_RED
+			tft.setCursor(xOffsetMg - strLenPixels-textToUnitGapPixels, yOffset); 	tft.print(mgDeems); 
+		}
+
+
+		void JB_LcdHdlr::setSolubilityField(const CurrentValuesJB & values)
+		{
+			uint8_t yOffset = 225; uint8_t xOffset = 235;//xoffset is for the "oluble" printed at setupscreen()
+			Solubility solubility = values.solubility;
+			//solubility=NOT_SOLUBLE;
+			String solStr = "S"; String upperLineString = "      ";
+			switch(solubility)
+  		{
+    		case PART_SOLUBLE:  upperLineString = "Quasi-"; break;
+    		case SOLUBLE:       														break;
+    		case NOT_SOLUBLE:   solStr = "Ins";    					break;
+    		default:            														break;
+  		}	
+  		
+   	uint16_t strLenPixels = getStringWidthPixels(&Open_Sans_Italic_23,solStr);
+  	//tft.FillRect (242-strLenPixels, yOffset-23,strLenPixels, 23, ST77XX_RED );
+  	tft.setCursor(xOffset-strLenPixels, yOffset); 	tft.print(solStr); 
+  	tft.setCursor(xOffset-5, yOffset-30); 					tft.print(upperLineString); 
+ 	}	
+void JB_LcdHdlr::setTotalJuiceGramsField(const CurrentValuesJB & values)
 {
-//PG Ratio test
-for (int16_t f=100; f>-1; f-=1)
-	{
-			valuesJB.pgRatio=f;
-		 	jb_calc.calculate(valuesJB, false);
-     	jb_lcdHandler.updateScreen(valuesJB);
-     	delay (50);
-	}
+	if (oldTotalWeightOfDJuice_g == values.totalWeightOfDJuice_g) {return;}
+	oldTotalWeightOfDJuice_g = values.totalWeightOfDJuice_g;
+	uint8_t yOffset = 225; 
+	float totalWeightOfDJuice_g = values.totalWeightOfDJuice_g;
+	String out=String(totalWeightOfDJuice_g,(totalWeightOfDJuice_g>=10?1:2));
+	uint16_t 	strLenPixels = getStringWidthPixels(&Open_Sans_Italic_23,out);
+	uint8_t  rectXlen = 60;
+	tft.fillRect (xOffsetMg-3 - rectXlen-textToUnitGapPixels,	yOffset-21, rectXlen, 24, colorTextBG); //ST77XX_RED
+  tft.setCursor(xOffsetMg-3-strLenPixels-textToUnitGapPixels, yOffset); 	tft.print(out);
+}		
 
-////dratio test
-for (float f=0; f<21; f+=0.1)
-	{
-			valuesJB.deemsRatio=f;
-		 	jb_calc.calculate(valuesJB, false);
-     	jb_lcdHandler.updateScreen(valuesJB);
-     	delay (10);
-	}
-
-	//djuice req'd test
-	for (float f=0; f<90; f+=0.1)
-	{
-			valuesJB.setTojMl(f);
-		 	jb_calc.calculate(valuesJB, false);
-     	jb_lcdHandler.updateScreen(valuesJB);
-     	delay (10);
-	}
+void drawBitMap()
+{
+	tft.fillScreen(ST77XX_BLACK);
+	//tft.drawRGBBitmap(0, 0, bitmap_Minty320_170, 320,170);
+	delay (10000);
+	tft.fillScreen(ST77XX_BLACK);
+	//tft.drawRGBBitmap(0, 0, bitmap_DestinyVideo320_170, 320,170);
+	delay (10000);
+	tft.fillScreen(ST77XX_BLACK);
+	//tft.drawRGBBitmap(0, 0, lcd_gs850, 320,215);
+	/**Many more drawbitmap functs in Adafruit_gfx.h
+	void drawRGBBitmap(int16_t x, int16_t y, const uint16_t bitmap[], int16_t w, int16_t h);
+  void drawRGBBitmap(int16_t x, int16_t y, uint16_t *bitmap, int16_t w, int16_t h);
+  void drawRGBBitmap(int16_t x, int16_t y, const uint16_t bitmap[], const uint8_t mask[], int16_t w, int16_t h);
+  void drawRGBBitmap(int16_t x, int16_t y, uint16_t *bitmap, uint8_t *mask, int16_t w, int16_t h);
+   */
 }
-
-//void testlines(uint16_t color) {
-//  tft.fillScreen(ST77XX_BLACK);
-//  for (int16_t x=0; x < tft.width(); x+=6) {
-//    tft.drawLine(0, 0, x, tft.height()-1, color);
-//    delay(0);
-//  }
-//  for (int16_t y=0; y < tft.height(); y+=6) {
-//    tft.drawLine(0, 0, tft.width()-1, y, color);
-//    delay(0);
-//  }
-//
-//  tft.fillScreen(ST77XX_BLACK);
-//  for (int16_t x=0; x < tft.width(); x+=6) {
-//    tft.drawLine(tft.width()-1, 0, x, tft.height()-1, color);
-//    delay(0);
-//  }
-//  for (int16_t y=0; y < tft.height(); y+=6) {
-//    tft.drawLine(tft.width()-1, 0, 0, y, color);
-//    delay(0);
-//  }
-//
-//  tft.fillScreen(ST77XX_BLACK);
-//  for (int16_t x=0; x < tft.width(); x+=6) {
-//    tft.drawLine(0, tft.height()-1, x, 0, color);
-//    delay(0);
-//  }
-//  for (int16_t y=0; y < tft.height(); y+=6) {
-//    tft.drawLine(0, tft.height()-1, tft.width()-1, y, color);
-//    delay(0);
-//  }
-//
-//  tft.fillScreen(ST77XX_BLACK);
-//  for (int16_t x=0; x < tft.width(); x+=6) {
-//    tft.drawLine(tft.width()-1, tft.height()-1, x, 0, color);
-//    delay(0);
-//  }
-//  for (int16_t y=0; y < tft.height(); y+=6) {
-//    tft.drawLine(tft.width()-1, tft.height()-1, 0, y, color);
-//    delay(0);
-//  }
-//}
-//
-//void testdrawtext(char *text, uint16_t color) {
-//  tft.setCursor(0, 0);
-//  tft.setTextColor(color);
-//  tft.setTextWrap(true);
-//  tft.print(text);
-//}
-//
-//void testfastlines(uint16_t color1, uint16_t color2) {  //240x320
-//  tft.fillScreen(ST77XX_BLUE);
-//	for (int y=230; y<250; ++y)
-//	{  tft.fillScreen(ST77XX_BLACK);
-//		 tft.setCursor(0, 30); tft.setTextColor(ST77XX_WHITE,ST77XX_BLUE); tft.setTextSize(4); tft.println(String("y=") + String(y));
-//		 tft.drawFastHLine(0, y, tft.width(), color1);
-//		 delay(1000);
-//	}
-////  for (int16_t y=0; y <= tft.height(); y+=20) {
-////    tft.drawFastHLine(0, y, tft.width(), color1);
-////  }
-//////  for (int16_t x=0; x < tft.width(); x+=20) {
-////    tft.drawFastVLine(x, 0, tft.height(), color2);
-////  }
-//}
-//
-//void testdrawrects(uint16_t color) {
-//  tft.fillScreen(ST77XX_BLACK);
-//  for (int16_t x=0; x < tft.width(); x+=6) {
-//    tft.drawRect(tft.width()/2 -x/2, tft.height()/2 -x/2 , x, x, color);
-//  }
-//}
-//
-//void testfillrects(uint16_t color1, uint16_t color2) {
-//  tft.fillScreen(ST77XX_BLACK);
-//  for (int16_t x=tft.width()-1; x > 6; x-=6) {
-//    tft.fillRect(tft.width()/2 -x/2, tft.height()/2 -x/2 , x, x, color1);
-//    tft.drawRect(tft.width()/2 -x/2, tft.height()/2 -x/2 , x, x, color2);
-//  }
-//}
-//
-//void testfillcircles(uint8_t radius, uint16_t color) {
-//  for (int16_t x=radius; x < tft.width(); x+=radius*2) {
-//    for (int16_t y=radius; y < tft.height(); y+=radius*2) {
-//      tft.fillCircle(x, y, radius, color);
-//    }
-//  }
-//}
-//
-//void testdrawcircles(uint8_t radius, uint16_t color) {
-//  for (int16_t x=0; x < tft.width()+radius; x+=radius*2) {
-//    for (int16_t y=0; y < tft.height()+radius; y+=radius*2) {
-//      tft.drawCircle(x, y, radius, color);
-//    }
-//  }
-//}
-//
-//void testtriangles() {
-//  tft.fillScreen(ST77XX_BLACK);
-//  uint16_t color = 0xF800;
-//  int t;
-//  int w = tft.width()/2;
-//  int x = tft.height()-1;
-//  int y = 0;
-//  int z = tft.width();
-//  for(t = 0 ; t <= 15; t++) {
-//    tft.drawTriangle(w, y, y, x, z, x, color);
-//    x-=4;
-//    y+=4;
-//    z-=4;
-//    color+=100;
-//  }
-//}
-//
-//void testroundrects() {
-//  tft.fillScreen(ST77XX_BLACK);
-//  uint16_t color = 100;
-//  int i;
-//  int t;
-//  for(t = 0 ; t <= 4; t+=1) {
-//    int x = 0;
-//    int y = 0;
-//    int w = tft.width()-2;
-//    int h = tft.height()-2;
-//    for(i = 0 ; i <= 16; i+=1) {
-//      tft.drawRoundRect(x, y, w, h, 5, color);
-//      x+=2;
-//      y+=3;
-//      w-=4;
-//      h-=6;
-//      color+=1100;
-//    }
-//    color+=100;
-//  }
-//}
-//
-//void tftPrintTest() {
-//  tft.setTextWrap(false);
-//  tft.fillScreen(ST77XX_BLACK);
-//  tft.setCursor(0, 30);
-//  tft.setTextColor(ST77XX_RED);
-//  tft.setTextSize(1);
-//  tft.println("Hello World!");
-//  tft.setTextColor(ST77XX_YELLOW);
-//  tft.setTextSize(2);
-//  tft.println("Hello World!");
-//  tft.setTextColor(ST77XX_GREEN);
-//  tft.setTextSize(3);
-//  tft.println("Hello World!");
-//  tft.setTextColor(ST77XX_BLUE);
-//  tft.setTextSize(4);
-//  tft.print(1234.567);
-//  delay(3000);
-//  tft.setCursor(0, 0);
-//  tft.fillScreen(ST77XX_BLACK);
-//  tft.setTextColor(ST77XX_WHITE);
-//  tft.setTextSize(0);
-//  tft.println("Hello World!");
-//  tft.setTextSize(1);
-//  tft.setTextColor(ST77XX_GREEN);
-//  
-//  tft.println(" Want pi?");
-//  tft.println(" ");
-//  tft.print(8675309, HEX); // print 8,675,309 out in HEX!
-//  tft.println(" Print HEX!");
-//  tft.println(" ");
-//  tft.setTextColor(ST77XX_WHITE);
-//  tft.println("Sketch has been");
-//  tft.println("running for: ");
-//  tft.setTextColor(ST77XX_MAGENTA);
-//  tft.print(millis() / 1000);
-//  tft.setTextColor(ST77XX_WHITE);
-//  tft.print(" seconds.");
-//}
