@@ -54,18 +54,14 @@ void loop()
 
 void test()
 {
-	
 //PG Ratio test
 for (int16_t f=100; f>-1; f-=1)
 	{
-		Serial.println(String("f=") + String(f));
 			valuesJB.pgRatio=f;
 		 	jb_calc.calculate(valuesJB, false);
      	jb_lcdHandler.updateScreen(valuesJB);
      	delay (50);
 	}
-
-
 
 ////dratio test
 for (float f=0; f<21; f+=0.1)
