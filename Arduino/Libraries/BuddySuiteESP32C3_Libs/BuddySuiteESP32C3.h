@@ -6,25 +6,20 @@ class CurrentValuesJB
 public: 
         void  setTojMl(float tojMl);
 		float getTojMl();
-		//float tojMl		=0; //initialised in the setup
-		
-		float deemsRatio			=0;
-		int16_t pgRatio				=0; //percentage PG
+		float deemsRatio			=0; 	
+		int16_t pgRatio				=0;  //percentage PG
 		float pgMl					=0;
 		float vgMl					=0;
 		uint16_t deemsMg			=0;
 		float totalWeightOfDJuice_g	=0;
 		float weightPg_g			=0;
 		float weightVg_g			=0;
-		
 		void  setup();
 		//uint8_t solubility=0; //0=SOLUBLE, 1=PART_SOLUBLE, 2=NOT_SOLUBLE
 		Solubility solubility;
-		
-		void incrementValue (const int & incValue, uint8_t fieldId);
-		
+		void incrementValue (const int & incValue, uint8_t fieldId);		
 private:	
-		float tojMl					=0; //initialised in the setup			 
+		float tojMl					=0; //initialised in the setup
 };
 #endif
 
@@ -67,18 +62,27 @@ class JB_LcdHdlr
 		void setSelectedField(uint8_t sel); //0-dJuice Reqd, 1-dRatio g/ml, 2-PG/VG, 3-DMT
 		void setJoystickMeter(uint16_t & rawXPos);  //0-4096
 private:
-		uint16_t colorTextBG    = 0x0004; // 1111111 1111111 1111111
-		uint32_t colorScreenBG  = ST77XX_CYAN;
-		uint16_t colorText1     = ST77XX_YELLOW;
-		uint16_t colorText2     = 0X7E0;
-		uint32_t colorCursor    = 0xFAAA;  
+		const uint8_t xMarginLeftPixels   = 12;
+		const uint8_t xMarginRightPixels  = 12;
+		const uint8_t lineSpacing	= 30;
+		const uint8_t textToUnitGapPixels = 3 ; //eg 1.3<gap>ml
+		const String  mlStr 		= "ml"; 
+		uint16_t colorTextBG    	= 0x0004; // 5.6.5 RGB
+		uint32_t colorScreenBG  	= ST77XX_CYAN;
+		uint16_t colorText1     	= ST77XX_YELLOW;
+		uint16_t colorText2     	= 0X7E0;
+		uint32_t colorCursor   	 	= 0xFAAA;  
+		float 	oldTojMl            = 0;
+		float 	oldDeemsRatio 		= 0; 
+		int16_t oldPgRatio	 		= 0;		
 		void setupScreen();
-		void setDjuiceRequiredField(CurrentValuesJB & values);
-		void setDRatField(CurrentValuesJB & values);
-		void setPgRatField(CurrentValuesJB & values);
-		void setPgMlOrVgMlField (CurrentValuesJB & values, boolean PG);
-		void setDeemsMgField	(const CurrentValuesJB & values);
-		void setSolubilityField	(const CurrentValuesJB & values);	
-		void setTotalJuiceGramsField(float totalWeightOfDJuice_g);		
+		void setDjuiceRequiredField	(CurrentValuesJB & values);
+		void setDRatField			(CurrentValuesJB & values);
+		void setPgRatField			(CurrentValuesJB & values);
+		void setPgMlOrVgMlField 	(CurrentValuesJB & values, boolean PG);
+		void setDeemsMgField		(const CurrentValuesJB & values);
+		void setSolubilityField		(const CurrentValuesJB & values);	
+		void setTotalJuiceGramsField(const CurrentValuesJB & values);
+		
 };
 #endif
