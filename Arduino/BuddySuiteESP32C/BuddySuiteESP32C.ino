@@ -22,29 +22,68 @@ JB_LcdHdlr jb_lcdHandler;
 
 void setup() {
   Serial.begin(115200);
+  Serial.println("here1");
   jb_lcdHandler.setup();
   jb_calc.setup();
   valuesJB.setup();
-
   jb_calc.calculate(valuesJB, false);
-
   jb_lcdHandler.updateScreen(valuesJB);
-
-// Serial.println (String("TotalJuice Reqd=") + String(valuesJB.tojMl));
-  Serial.println (String("Deems Ratio=1:") + String(valuesJB.deemsRatio));
-  Serial.println (String("PG/VG=")+ String(valuesJB.pgRatio) + String("/") 		+ String ((100-valuesJB.pgRatio)));
-  Serial.println (String("PG=") 	+ String(valuesJB.pgMl) 	 + String(", (") 	+ String (valuesJB.weightPg_g) + String("g)"));
-  Serial.println (String("VG=") 	+ String(valuesJB.vgMl) 	 + String(", (") 	+ String (valuesJB.weightVg_g) + String("g)"));
-  Serial.println (String("Total juice Weight=") + String(valuesJB.totalWeightOfDJuice_g));
-  Serial.println (String("Solubility=") + String(valuesJB.solubility));
+ 
   // SPI speed defaults to SPI_DEFAULT_FREQ defined in the library, you can override it here
   // Allowable spped depends on chip & wiring Too fast may get you a black screen some times, continuous.
   //tft.setSPISpeed(40000000);
   //delay(5000);
 }
 
-void loop() {
+void printValues()
+{
+	Serial.println (String("TotalJuice Reqd=") + String(valuesJB.getTojMl()));
+	Serial.println (String("Deems Ratio=1:") + String(valuesJB.deemsRatio));
+  Serial.println (String("PG/VG=")+ String(valuesJB.pgRatio) + String("/") 		+ String ((100-valuesJB.pgRatio)));
+  Serial.println (String("PG=") 	+ String(valuesJB.pgMl) 	 + String(", (") 	+ String (valuesJB.weightPg_g) + String("g)"));
+  Serial.println (String("VG=") 	+ String(valuesJB.vgMl) 	 + String(", (") 	+ String (valuesJB.weightVg_g) + String("g)"));
+  Serial.println (String("Total juice Weight=") + String(valuesJB.totalWeightOfDJuice_g));
+  Serial.println (String("Solubility=") + String(valuesJB.solubility));
+}
+
+void loop() 
+{
+	test();
   delay(5000);
+}
+
+void test()
+{
+	
+//PG Ratio test
+for (int16_t f=100; f>-1; f-=1)
+	{
+		Serial.println(String("f=") + String(f));
+			valuesJB.pgRatio=f;
+		 	jb_calc.calculate(valuesJB, false);
+     	jb_lcdHandler.updateScreen(valuesJB);
+     	delay (50);
+	}
+
+
+
+////dratio test
+for (float f=0; f<21; f+=0.1)
+	{
+			valuesJB.deemsRatio=f;
+		 	jb_calc.calculate(valuesJB, false);
+     	jb_lcdHandler.updateScreen(valuesJB);
+     	delay (10);
+	}
+
+	//djuice req'd test
+	for (float f=0; f<90; f+=0.1)
+	{
+			valuesJB.setTojMl(f);
+		 	jb_calc.calculate(valuesJB, false);
+     	jb_lcdHandler.updateScreen(valuesJB);
+     	delay (10);
+	}
 }
 
 //void testlines(uint16_t color) {
@@ -104,10 +143,6 @@ void loop() {
 //		 tft.drawFastHLine(0, y, tft.width(), color1);
 //		 delay(1000);
 //	}
-//
-//
-//
-//  
 ////  for (int16_t y=0; y <= tft.height(); y+=20) {
 ////    tft.drawFastHLine(0, y, tft.width(), color1);
 ////  }
