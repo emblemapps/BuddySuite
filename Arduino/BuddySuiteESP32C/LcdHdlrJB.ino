@@ -1,9 +1,9 @@
   //tft.init(320, 240);           //1.3" or 1.54" 240x240 ST7789 TFT:
-   //tft.init(240, 280);           //1.69" 280x240 ST7789 TFT:
-   //tft.init(135, 240);           //       ST7789 240x135
-   //tft.init(172, 320);           // 1.47" 172x320 ST7789 TFT:
-   //tft.init(170, 320);           // 1.9"  170x320 ST7789 TFT
-   // SPI speed defaults to SPI_DEFAULT_FREQ defined in the library, you can override it here
+  //tft.init(240, 280);           //1.69" 280x240 ST7789 TFT:
+  //tft.init(135, 240);           //       ST7789 240x135
+  //tft.init(172, 320);           // 1.47" 172x320 ST7789 TFT:
+  //tft.init(170, 320);           // 1.9"  170x320 ST7789 TFT
+  // SPI speed defaults to SPI_DEFAULT_FREQ defined in the library, you can override it here
   // Allowable spped depends on chip & wiring Too fast may get you a black screen some times, continuous.
   //tft.setSPISpeed(40000000);
   
@@ -37,14 +37,18 @@ void JB_LcdHdlr::setupScreen()
 				/////////////////////////////////////////////////////////////////////////////////////////////////
 				tft.setTextColor(colorText2, colorTextBG); 
 				yOffset+=lineSpacing+15;
-  			tft.setCursor(xMarginLeftPixels, yOffset); tft.print("PG") ; tft.setCursor(150, yOffset); tft.print("ml"); tft.setCursor(297, yOffset); tft.print("g");
+  			tft.setCursor(xMarginLeftPixels, yOffset); tft.print("PG") ; tft.setCursor(xOffsetMl, yOffset); tft.print("ml"); tft.setCursor(297, yOffset); tft.print("g");
   			yOffset+=lineSpacing;
-  			tft.setCursor(xMarginLeftPixels, yOffset); tft.print("VG") ; tft.setCursor(150, yOffset); tft.print("ml"); tft.setCursor(297, yOffset); tft.print("g");
+  			tft.setCursor(xMarginLeftPixels, yOffset); tft.print("VG") ; tft.setCursor(xOffsetMl, yOffset); tft.print("ml"); tft.setCursor(297, yOffset); tft.print("g");
   			yOffset+=lineSpacing;
-  			tft.setCursor(xMarginLeftPixels, yOffset); tft.print("DMT"); tft.setCursor(148, yOffset); tft.print("mg");
+  			tft.setCursor(xMarginLeftPixels, yOffset); tft.print("DMT"); tft.setCursor(xOffsetMg, yOffset); tft.print("mg");
 				yOffset+=lineSpacing;
-				tft.setTextColor(ST77XX_CYAN, colorTextBG);
-  			tft.setCursor(235, yOffset); tft.print(("oluble"));
+
+				tft.setTextColor(ST77XX_CYAN, colorTextBG); 
+  			tft.setCursor(xMarginLeftPixels, yOffset); 	tft.print("Total");  
+  			tft.setCursor(xOffsetMg, yOffset);					tft.print("g");
+  			olubleStrLenPixels = getStringWidthPixels(&Open_Sans_Italic_23, olubleStr);
+  			tft.setCursor(tft.width() - xMarginRightPixels - olubleStrLenPixels, yOffset); tft.print(olubleStr);
 		}
 
 void JB_LcdHdlr::setup()
@@ -150,13 +154,18 @@ void JB_LcdHdlr::setDjuiceRequiredField(CurrentValuesJB & values)
 		
 		void JB_LcdHdlr::setDeemsMgField(const CurrentValuesJB & values)
 		{
-			uint8_t yOffset = 195; uint8_t xOffset = 88;
+			if(oldDeemsMg==values.deemsMg){return;}  //return if this display isn't being changed.  Saves flicker.
+			oldDeemsMg = values.deemsMg;
+			uint8_t 	yOffset = 195;
 			uint16_t  deemsMg = values.deemsMg;
 			String 		mgDeems = String(deemsMg);
 			uint16_t 	strLenPixels = getStringWidthPixels(&Open_Sans_Italic_23,mgDeems);
-			
-			tft.setCursor(148-strLenPixels-5, yOffset); tft.print(mgDeems); 
+			uint8_t 	rectXlen = 70;
+			tft.fillRect (xOffsetMg - rectXlen-textToUnitGapPixels,		  yOffset-21, rectXlen, 24, colorTextBG); //ST77XX_RED
+			tft.setCursor(xOffsetMg - strLenPixels-textToUnitGapPixels, yOffset); 	tft.print(mgDeems); 
 		}
+
+
 		void JB_LcdHdlr::setSolubilityField(const CurrentValuesJB & values)
 		{
 			uint8_t yOffset = 225; uint8_t xOffset = 235;//xoffset is for the "oluble" printed at setupscreen()
@@ -172,16 +181,21 @@ void JB_LcdHdlr::setDjuiceRequiredField(CurrentValuesJB & values)
   		}	
   		
    	uint16_t strLenPixels = getStringWidthPixels(&Open_Sans_Italic_23,solStr);
-  	//tft.drawRect (242-strLenPixels, yOffset-23,strLenPixels, 23, ST77XX_RED );
+  	//tft.FillRect (242-strLenPixels, yOffset-23,strLenPixels, 23, ST77XX_RED );
   	tft.setCursor(xOffset-strLenPixels, yOffset); 	tft.print(solStr); 
   	tft.setCursor(xOffset-5, yOffset-30); 					tft.print(upperLineString); 
  	}	
 void JB_LcdHdlr::setTotalJuiceGramsField(const CurrentValuesJB & values)
 {
-	uint8_t yOffset = 225; uint8_t xOffset = 12;
+	if (oldTotalWeightOfDJuice_g == values.totalWeightOfDJuice_g) {return;}
+	oldTotalWeightOfDJuice_g = values.totalWeightOfDJuice_g;
+	uint8_t yOffset = 225; 
 	float totalWeightOfDJuice_g = values.totalWeightOfDJuice_g;
-	String out= String("Total     ") + String(totalWeightOfDJuice_g,(totalWeightOfDJuice_g>=10?1:2)) + String("g");
-  tft.setCursor(xOffset, yOffset); 	tft.print(out);
+	String out=String(totalWeightOfDJuice_g,(totalWeightOfDJuice_g>=10?1:2));
+	uint16_t 	strLenPixels = getStringWidthPixels(&Open_Sans_Italic_23,out);
+	uint8_t  rectXlen = 60;
+	tft.fillRect (xOffsetMg-3 - rectXlen-textToUnitGapPixels,	yOffset-21, rectXlen, 24, colorTextBG); //ST77XX_RED
+  tft.setCursor(xOffsetMg-3-strLenPixels-textToUnitGapPixels, yOffset); 	tft.print(out);
 }		
 
 void drawBitMap()
