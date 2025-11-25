@@ -1,4 +1,3 @@
-
 #include <BuddySuiteESP32C3.h>
 //#include <./Pics/picMinty.h>
 //#include <./Pics/picDestiny.h>
