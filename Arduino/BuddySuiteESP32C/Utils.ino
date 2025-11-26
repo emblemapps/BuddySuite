@@ -1,7 +1,5 @@
 /**
  * Connections
- * 
- * 
  * ESP32C3  ST7789 Display (currently 320x240)
  * 3.3V				BL  brown
  * GPIO 21		CS	purple
@@ -43,19 +41,17 @@
   		GFXglyph *glyph  = gfxFont->glyph + currentChar;
 			uint16_t pixelWidthCurrent = pgm_read_byte(&glyph->xAdvance);
 			pixelLengthCount+=pixelWidthCurrent;
-			Serial.println(((char)char_array[idx])  + String("=") + String(pixelWidthCurrent)+ String(", total pixels so far=") + String(pixelLengthCount));
+			//Serial.println(((char)char_array[idx])  + String("=") + String(pixelWidthCurrent)+ String(", total pixels so far=") + String(pixelLengthCount));
 		}
 		return pixelLengthCount;
  }
-  
-
   /**
    * Also for reading glyphs struct .....
     GFXglyph *glyph = pgm_read_glyph_ptr(gfxFont, c);
     uint8_t *bitmap = pgm_read_bitmap_ptr(gfxFont);
     uint16_t bo = pgm_read_word(&glyph->bitmapOffset);
-    uint8_t w 	= pgm_read_byte(&glyph->width), h = pgm_read_byte(&glyph->height);
+    uint8_t w 	= pgm_read_byte(&glyph->width), 
+    uint8_t h   = pgm_read_byte(&glyph->height);
     int8_t xo 	= pgm_read_byte(&glyph->xOffset),
     int8_t yo  = pgm_read_byte(&glyph->yOffset);
    */
- 
