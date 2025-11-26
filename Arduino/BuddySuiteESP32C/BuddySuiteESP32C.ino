@@ -7,8 +7,8 @@
 #include <./fonts/Open_Sans_Italic_23.h> 
 
 #define TFT_CS        21
-#define TFT_RST        9 // Or set to -1 and connect to Arduino RESET pin
-#define TFT_DC         10
+#define TFT_RST       9 // Or set to -1 and connect to Arduino RESET pin
+#define TFT_DC        10
 // gpio6 is mosi (SDA on display)
 // gpio4 is sck  (SCL on display)
 //For all connections, see "Utils" tab
@@ -54,31 +54,33 @@ void loop()
 void test()
 {
 //PG Ratio test
-for (int16_t f=100; f>-1; f-=1)
+for (int16_t f=30; f>-1; f-=1)
 	{
 			valuesJB.pgRatio=f;
 		 	jb_calc.calculate(valuesJB, false);
      	jb_lcdHandler.updateScreen(valuesJB);
-     	delay (50);
+     	delay (200);
 	}
 
+/**
 ////dratio test
-for (float f=0; f<21; f+=0.1)
+for (float f=0; f<21; f+=0.5)
 	{
 			valuesJB.deemsRatio=f;
 		 	jb_calc.calculate(valuesJB, false);
      	jb_lcdHandler.updateScreen(valuesJB);
-     	delay (10);
+     	delay (100);
 	}
-
+*/
 	//djuice req'd test
-	for (float f=0; f<90; f+=0.1)
+	for (float f=0; f<90; f+=0.9)
 	{
 			valuesJB.setTojMl(f);
 		 	jb_calc.calculate(valuesJB, false);
      	jb_lcdHandler.updateScreen(valuesJB);
-     	delay (10);
+     	delay (100);
 	}
+	
 }
 
 //void testlines(uint16_t color) {
