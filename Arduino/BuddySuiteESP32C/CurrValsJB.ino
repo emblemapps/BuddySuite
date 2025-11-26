@@ -1,4 +1,4 @@
-// C:\Users\Rob\Documents\Arduino\libraries\BuddySuiteESP32C3_LibsC:\Users\Rob\Documents\Arduino\libraries\BuddySuiteESP32C3_Libs
+ // C:\Users\Rob\Documents\Arduino\libraries\BuddySuiteESP32C3_LibsC:\Users\Rob\Documents\Arduino\libraries\BuddySuiteESP32C3_Libs
 void CurrentValuesJB::setup()
 {
     tojMl     = 3; 
@@ -28,7 +28,7 @@ float CurrentValuesJB::getTojMl()
 #define MIN_PG 0
 #define MAX_PG 100
 #define MIN_DEEMSRATIO 0.5
-#define MAX_DEEMSRATIO 9.9
+#define MAX_DEEMSRATIO 20
 
 void CurrentValuesJB::incrementValue (const int & incValueIn, uint8_t selectedField)
 {
