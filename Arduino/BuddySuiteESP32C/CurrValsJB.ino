@@ -1,4 +1,4 @@
- // C:\Users\Rob\Documents\Arduino\libraries\BuddySuiteESP32C3_LibsC:\Users\Rob\Documents\Arduino\libraries\BuddySuiteESP32C3_Libs
+// C:\Users\Rob\Documents\Arduino\libraries\BuddySuiteESP32C3_LibsC:\Users\Rob\Documents\Arduino\libraries\BuddySuiteESP32C3_Libs
 void CurrentValuesJB::setup()
 {
     tojMl     = 3; 
@@ -51,7 +51,7 @@ float incValue=incValueIn;
             if (absIncValue>8) 
             {
             	tojMl+=incValue/10;
-            	Serial.println (String ("tojMl=") + String (tojMl) + String(", incValue=") + String(incValue));
+            	//Serial.println (String ("tojMl=") + String (tojMl) + String(", incValue=") + String(incValue));
             }
             else               {tojMl+=incValue/100;} //set increment based on stick excursion
 						
