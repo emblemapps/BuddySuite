@@ -69,6 +69,8 @@ private:
 		const uint8_t lineSpacing		  = 30;
 		const uint8_t textToUnitGapPixels = 3 ; //eg 1.3<gap>ml
 		uint16_t 	  olubleStrLenPixels  = 0 ; //set in setupScreen()
+	    uint16_t 	  quasi_StrLenPixels  = 0 ; //set in setupScreen()
+		const String  quasi_Str           = "Quasi-";
 		const String  mlStr 		= "ml"; 
 		const String  olubleStr     = "oluble";
 		uint16_t colorTextBG    	= 0x0004; // 5.6.5 RGB
@@ -80,7 +82,10 @@ private:
 		float 	 oldDeemsRatio 		= 0; 
 		int16_t  oldPgRatio	 		= 0;
 		uint16_t oldDeemsMg			= 0;
-        uint16_t oldTotalWeightOfDJuice_g = 0;		
+        uint16_t oldTotalWeightOfDJuice_g = 0;
+		float oldPgMl               = 0;
+		float oldVgMl               = 0;
+		Solubility oldSolubility	= NOT_SOLUBLE;	 //something that mismatches initial setup so we force update to get "Soluble" and not "oluble"
 		void setupScreen();
 		void setDjuiceRequiredField	(CurrentValuesJB & values);
 		void setDRatField			(CurrentValuesJB & values);
