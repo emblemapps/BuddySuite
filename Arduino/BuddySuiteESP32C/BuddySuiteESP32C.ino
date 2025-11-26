@@ -1,3 +1,5 @@
+#include <Adafruit_GFX.h>    // Core graphics library
+#include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
 #include <BuddySuiteESP32C3.h>
 //#include <./Pics/picMinty.h>
 //#include <./Pics/picDestiny.h>
@@ -17,7 +19,6 @@ Utils utils;
 CurrentValuesJB valuesJB;
 JB_Calc jb_calc;
 JB_LcdHdlr jb_lcdHandler;
-
 
 void setup() {
   Serial.begin(115200);
