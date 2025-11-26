@@ -13,8 +13,16 @@
 Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);  
 //Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
 
+void JB_LcdHdlr::setup()
+{
+	tft.init(240, 320);            			//2.0" 320x240 ST7789 TFT
+  setupScreen();
+}	
+
 void JB_LcdHdlr::setupScreen()
 		{		  
+				tft.setFont(&Open_Sans_Italic_23); 	// https://oleddisplay.squix.ch/
+				tft.setRotation(1);
 				tft.fillScreen(colorTextBG);
 				//////////////////////////////////////////////////////////////////////////////////
 				tft.drawRoundRect(0, 0, 	tft.width(), tft.height()-135, 10, colorText1);  //border line top
@@ -53,16 +61,11 @@ void JB_LcdHdlr::setupScreen()
   			quasi_StrLenPixels = getStringWidthPixels(&Open_Sans_Italic_23, quasi_Str); //housekeeping for the solubility display update
 		}
 
-void JB_LcdHdlr::setup()
-{
-	tft.init(240, 320);            			//2.0" 320x240 ST7789 TFT
-	tft.setFont(&Open_Sans_Italic_23); 	// https://oleddisplay.squix.ch/
-	tft.setRotation(1);
-  setupScreen();
-}	
 
 void JB_LcdHdlr::updateScreen(CurrentValuesJB & values)  
 {
+	
+	//Serial.println(String("jb_values.pgMl=") + String(values.pgMl));
 	tft.setTextColor(colorText1, colorTextBG);
 	setDjuiceRequiredField (values);
 	setDRatField 					 (values);
@@ -74,8 +77,34 @@ void JB_LcdHdlr::updateScreen(CurrentValuesJB & values)
 	tft.setTextColor(ST77XX_CYAN, colorTextBG);
 	setSolubilityField     (values);
 	setTotalJuiceGramsField(values);
+
+	for(int xx=0;xx<10;++xx)
+  {
+  	for (int ccc=0;ccc<4; ++ccc)
+		{
+				setSelectedField(ccc);
+			delay(400);
+		}
+  }
 }
-void JB_LcdHdlr::setSelectedField(uint8_t sel){} //0-dJuice Reqd, 1-dRatio g/ml, 2-PG/VG, 3-DMT
+void JB_LcdHdlr::setSelectedField(uint8_t sel) //0-dJuice Reqd, 1-dRatio g/ml, 2-PG/VG, 3-DMT
+{
+	// tftdrawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color);
+	//int yOffset = 30; //bottom left
+	const int yHeight = 22; 	const int xOffset 	= 200; 	const int xLen 		= 25;
+
+int currSel=0;
+	for (int yOffset=30; yOffset<91; yOffset+=30)
+	{
+	   tft.fillTriangle(xOffset, yOffset, xOffset, yOffset-yHeight, xOffset+xLen,  yOffset- (yHeight/2),  (sel==currSel? ST77XX_BLUE : colorTextBG));
+	   ++currSel;
+	}
+
+int yOffset = 190;	
+tft.fillTriangle(xOffset-8, yOffset, xOffset-8+xLen, (yOffset-yHeight/2), xOffset-8+xLen, (yOffset+yHeight/2) ,  (sel==currSel? ST77XX_BLUE : colorTextBG));
+	
+	 
+} 
 void JB_LcdHdlr::setJoystickMeter(uint16_t & rawXPos){}  //0-4096
 	
 void JB_LcdHdlr::setDjuiceRequiredField(CurrentValuesJB & values)
@@ -138,26 +167,24 @@ void JB_LcdHdlr::setDjuiceRequiredField(CurrentValuesJB & values)
 		void JB_LcdHdlr::setPgMlOrVgMlField(CurrentValuesJB & values, boolean PG)
 		{
 						if ( PG && (oldPgMl==values.pgMl)) {return;}
-			else  if (!PG && (oldVgMl==values.pgMl)) {return;}
-			
-			uint8_t yOffset = 135;  if (!PG) {yOffset = 165;}
-			uint16_t xOffset = 95;
-			
+			else  if (!PG && (oldVgMl==values.vgMl)) {return;}
+
+			uint8_t yOffset = 135; 
+			if(PG) 	{oldPgMl=values.pgMl;}
+			else		{yOffset = 165; oldVgMl=values.vgMl;}
+
 			float ml = (PG? values.pgMl:values.vgMl );
 			String MlStr = String(ml,2); 
-			//tft.setCursor(xOffset, yOffset); tft.print(MlStr);
 			uint16_t mlStrLenPixels = getStringWidthPixels(&Open_Sans_Italic_23, MlStr);
 			uint8_t rectXlen = 70;
-			tft.fillRect (xOffsetMl - rectXlen-textToUnitGapPixels,		yOffset-20, rectXlen, 24,colorTextBG ); //ST77XX_RED colorTextBG
+			tft.fillRect (xOffsetMl - rectXlen-textToUnitGapPixels,		yOffset-20, rectXlen, 24, colorTextBG ); //ST77XX_RED colorTextBG
 			tft.setCursor(xOffsetMl - textToUnitGapPixels - mlStrLenPixels, yOffset); tft.print(MlStr);
 			//////////////////////////////////////////////////
 			float gWeight = (PG?ml*1.036:ml*1.261);
     	String gStr;
     	if(gWeight<10){gStr  =String(gWeight,2);}
     	else    			{gStr  =String(gWeight,1);}
-			xOffset = 297;
-
-			//rectXlen = 70;
+			
 			uint16_t strLenPixels = getStringWidthPixels(&Open_Sans_Italic_23, gStr); 
 			tft.fillRect (tft.width()- xMarginRightPixels - textToUnitGapPixels - rectXlen-12,	yOffset-20, rectXlen, 24,colorTextBG ); //ST77XX_RED colorTextBG
   		tft.setCursor(tft.width()- xMarginRightPixels - strLenPixels - textToUnitGapPixels-12, yOffset); 	tft.print(gStr);    
@@ -187,11 +214,14 @@ void JB_LcdHdlr::setDjuiceRequiredField(CurrentValuesJB & values)
 			//solubility=NOT_SOLUBLE;
 			String solStr = "S"; String upperLineString = "";
 			switch(solubility)
-  		{
-    		case PART_SOLUBLE:  upperLineString = quasi_Str; break;
-    		case SOLUBLE:       														break;
-    		case NOT_SOLUBLE:   solStr = "Ins";    					break;
-    		default:            														break;
+  		{ /*#define ST77XX_ORANGE 0xFC00  1111 1100 0000 0000
+  																			11111 100000 00000
+  																			11111 110000 00000
+  																			1111 1110 0000 0000*/ 
+    		case PART_SOLUBLE:  upperLineString = quasi_Str; tft.drawRoundRect(0, 108, tft.width(), tft.height()-110, 10, 0xFE00);	break;
+    		case SOLUBLE:       tft.drawRoundRect(0, 108, tft.width(), tft.height()-110, 10, colorText2);																	break;
+    		case NOT_SOLUBLE:   solStr = "Ins";  tft.drawRoundRect(0, 108, tft.width(), tft.height()-110, 10, ST77XX_RED);								break;
+    		default:            																																																					break;
   		}	
   		
    	uint16_t strLenPixels = getStringWidthPixels(&Open_Sans_Italic_23,solStr);
@@ -232,4 +262,4 @@ void drawBitMap()
   void drawRGBBitmap(int16_t x, int16_t y, const uint16_t bitmap[], const uint8_t mask[], int16_t w, int16_t h);
   void drawRGBBitmap(int16_t x, int16_t y, uint16_t *bitmap, uint8_t *mask, int16_t w, int16_t h);
    */
-} 
+}
