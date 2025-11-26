@@ -1,16 +1,3 @@
-/**
- * class JB_Calc
-{ 
-public: 
-		void setup(); //never called
-		void calculate(CurrentValuesJB & values, boolean Dont_Update_DeemsMg);
-		void calculateForDeemsWeight(CurrentValuesJB & values);
-private:				 
-};
- */
-
-
-
 
 void JB_Calc::setup()
 {
@@ -23,6 +10,7 @@ void JB_Calc::calculate(CurrentValuesJB & jb_values, boolean Dont_Update_DeemsMg
   {
      float tijMl = (jb_values.getTojMl()) / ((0.95 / jb_values.deemsRatio ) + 1.0);
      jb_values.pgMl = (jb_values.pgRatio/100.0) * tijMl;
+     //Serial.println(String("pmMl=") + String(jb_values.pgMl));
      jb_values.vgMl = tijMl - jb_values.pgMl;
      if(!Dont_Update_DeemsMg)
     {
