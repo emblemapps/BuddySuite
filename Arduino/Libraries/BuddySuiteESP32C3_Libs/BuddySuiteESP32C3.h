@@ -1,3 +1,4 @@
+//27Nov2025
 #ifndef HEADER_CurrentValues
 #define HEADER_CurrentValues
 enum Solubility {SOLUBLE, PART_SOLUBLE, NOT_SOLUBLE};
@@ -42,12 +43,41 @@ private:
 
 #ifndef HEADER_LcdHdlr
 #define HEADER_LcdHdlr
+//#include <./Pics/picMinty.h>
+//#include <./Pics/picDestiny.h>
+//#include <./Pics/GS850_320x215.h>
+//#include <./fonts/Open_Sans_Italic_21.h> 
+//#include <./fonts/Open_Sans_Italic_16.h> 
+//#include <./fonts/Open_Sans_Italic_23.h> 
+
+#include <Adafruit_GFX.h>    // Core graphics library
+#include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
+#define TFT_CS        21
+#define TFT_RST       9 // Or set to -1 and connect to Arduino RESET pin
+#define TFT_DC        10
+Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);  
 class LcdHdlr
-{
-	
+{	
 	public: 
 			LcdHdlr(){}
-			void setup();	
+			void setup(){tft.init(240, 320);}          			//2.0" 320x240 ST7789 TFT}
+			void drawBitMap(Adafruit_ST7789 tft)
+			{
+				tft.fillScreen(ST77XX_BLACK);
+				//tft.drawRGBBitmap(0, 0, bitmap_Minty320_170, 320,170);
+				delay (10000);
+				tft.fillScreen(ST77XX_BLACK);
+				//tft.drawRGBBitmap(0, 0, bitmap_DestinyVideo320_170, 320,170);
+				delay (10000);
+				tft.fillScreen(ST77XX_BLACK);
+			   //tft.drawRGBBitmap(0, 0, lcd_gs850, 320,215);
+				/**Many more drawbitmap functs in Adafruit_gfx.h
+				void drawRGBBitmap(int16_t x, int16_t y, const uint16_t bitmap[], int16_t w, int16_t h);
+				void drawRGBBitmap(int16_t x, int16_t y, uint16_t *bitmap, int16_t w, int16_t h);
+				void drawRGBBitmap(int16_t x, int16_t y, const uint16_t bitmap[], const uint8_t mask[], int16_t w, int16_t h);
+				void drawRGBBitmap(int16_t x, int16_t y, uint16_t *bitmap, uint8_t *mask, int16_t w, int16_t h);
+				*/
+			}
 	protected:
 		uint16_t colorTextBG    		  = 0x0004; // 5.6.5 RGB
 		uint32_t colorScreenBG  		  = ST77XX_CYAN;
@@ -59,14 +89,27 @@ class LcdHdlr
 };
 #endif
 
+#ifndef HEADER_JBMain
+#define HEADER_JBMain
+class JB_Main
+{
+	public:
+			void initJB();
+			void startJB();
+			void test();
+	private:
+};
+#endif
+
+
 #ifndef HEADER_JBLcdHdlr
 #define HEADER_JBLcdHdlr
-
 class JB_LcdHdlr:public  LcdHdlr
 {
 	public: 
 		JB_LcdHdlr(){}
-		void setup();
+		//void setup();
+		void setupScreen();
 		void updateScreen(CurrentValuesJB & values);
 		void setSelectedField(uint8_t sel); //0-dJuice Reqd, 1-dRatio g/ml, 2-PG/VG, 3-DMT
 		void setJoystickMeter(uint16_t & rawXPos);  //0-4096
@@ -89,7 +132,7 @@ private:
 		float oldPgMl               = 0;
 		float oldVgMl               = 0;
 		Solubility oldSolubility	= NOT_SOLUBLE;	 //something that mismatches initial setup so we force update to get "Soluble" and not "oluble"
-		void setupScreen();
+		
 		void setDjuiceRequiredField	(CurrentValuesJB & values);
 		void setDRatField			(CurrentValuesJB & values);
 		void setPgRatField			(CurrentValuesJB & values);
@@ -107,5 +150,41 @@ class Utils
 	public:
 		void rightJustifyPad(String & mlStr, int16_t reqLen);
 	private:	
+};
+#endif
+
+#ifndef HEADER_JoystickReader
+#define HEADER_JoystickReader
+#define JOYSTICK_X 3     
+#define JOYSTICK_Y 4
+class JoystickReader
+{
+	public:
+				
+	protected:
+			void setup();
+			boolean isCentredYRaw(int joystickInYRaw);
+			boolean isCentredXRaw(int joystickInXRaw);
+			boolean isCentredY();
+			boolean isCentredX();
+			boolean isCentred();
+			//void getSelectedRow(uint8_t & selectedRow);
+			//void readAndConvertJoystick(const int & incRawX, const int & incRawY);	
+	private:
+            //void makeJoystickMeterString(uint8_t & incX);			
+};
+#endif
+
+#ifndef HEADER_JoystickReaderJB
+#define HEADER_JoystickReaderJB
+class JoystickReaderJB
+{
+	public:
+	protected:
+			void getSelectedRow(uint8_t & selectedRow);
+			void readAndConvertJoystick(const int & incRawX, const int & incRawY);	
+	private:
+            void makeJoystickMeterString(uint8_t & incX);	
+			
 };
 #endif
