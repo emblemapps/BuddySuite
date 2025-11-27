@@ -1,3 +1,4 @@
+//27Nov2025
 // C:\Users\Rob\Documents\Arduino\libraries\BuddySuiteESP32C3_LibsC:\Users\Rob\Documents\Arduino\libraries\BuddySuiteESP32C3_Libs
 void CurrentValuesJB::setup()
 {
@@ -10,7 +11,6 @@ void CurrentValuesJB::setup()
 //  deemsMg =0;
 
 //juiceCalc.calculate(tojMl, deemsRatio, pgRatio, pgMl, vgMl, deemsMg);
-
 }
 
 void CurrentValuesJB::setTojMl(float tojMlin)
