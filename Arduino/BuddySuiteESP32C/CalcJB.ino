@@ -1,8 +1,5 @@
-
-void JB_Calc::setup()
-{
-
-}
+//27Nov2025
+void JB_Calc::setup(){}
 
 //float tojMl, deemsRatio, pgRatio, pgMl, vgMl, deemsMg; in AllJuiceBuddy.h
 /** given total djuice, dmt ratio, and pg/vg ratio, calculate pg, vg and dmt weight */  
@@ -13,9 +10,9 @@ void JB_Calc::calculate(CurrentValuesJB & jb_values, boolean Dont_Update_DeemsMg
      //Serial.println(String("pmMl=") + String(jb_values.pgMl));
      jb_values.vgMl = tijMl - jb_values.pgMl;
      if(!Dont_Update_DeemsMg)
-    {
+    	{
         jb_values.deemsMg =  (tijMl*1000)/jb_values.deemsRatio; 
-     } 
+    	} 
 //Serial.println(String ("dmRat=") + String(jb_values.deemsRatio, 4) + String("tijMl") + String(tijMl,4) + String(", mg=") +  String(jb_values.deemsMg));
 //printing oout 1.1 to serial monitor but 1:1.0 on LCD screeen
      
