@@ -1,22 +1,49 @@
-//27Nov2025
+//28Nov2025
 CurrentValuesJB valuesJB;
 JB_Calc 	 			jb_calc;
 JB_LcdHdlr 			jb_lcdHandler;
+JB_JoystickReader joystickReader; 
+uint8_t rowSelected, oldRow=0;
 
 /** called once at startup*/
 void JB_Main::initJB() 
 {
-	jb_lcdHandler.setup();
-  jb_calc.setup();
-  valuesJB.setup();
+	joystickReader.setup();
+	jb_lcdHandler	.setup();
+  jb_calc				.setup();
+  valuesJB			.setup();
 }
 
-void JB_Main:: startJB()
+void JB_Main::startJB()
 {
 	jb_lcdHandler.setupScreen();
 	jb_calc.calculate(valuesJB, false);
   jb_lcdHandler.updateScreen(valuesJB);
 }
+
+
+void JB_Main::loopJB()
+{
+	joystickReader.getSelectedRow(rowSelected); //0 - dJuice Reqd >  1 - dRatio g/ml > 2 - PG/VG 3 - DMT
+
+	if(rowSelected!=oldRow)
+   { 
+//  	Serial.println(String("SelectedRowChanged, new=") + String(rowSelected));
+    jb_lcdHandler.setSelectedField(rowSelected);   
+    oldRow = rowSelected; 
+   }
+//
+ if(joystickReader.isCentredYRaw() && !joystickReader.isCentredXRaw() )
+ {
+		  valuesJB.incrementValue(joystickReader.getJoystickXMappedVal(), rowSelected);
+	   if(rowSelected==3){jb_calc.calculateForDeemsWeight(valuesJB);}
+	   else {jb_calc.calculate(valuesJB, false);}
+	   jb_lcdHandler.updateScreen(valuesJB);
+ }
+  
+ delay(50);
+ }
+
 
 void JB_Main::test()
 {
@@ -45,7 +72,7 @@ for (float f=0; f<21; f+=0.5)
 			valuesJB.setTojMl(f);
 		 	jb_calc.calculate(valuesJB, false);
      	jb_lcdHandler.updateScreen(valuesJB);
-     	delay (100);
+     	delay (200);
 	}
 	
 }
