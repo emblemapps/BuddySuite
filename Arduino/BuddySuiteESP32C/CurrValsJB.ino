@@ -1,4 +1,4 @@
-//27Nov2025
+//28Nov2025
 // C:\Users\Rob\Documents\Arduino\libraries\BuddySuiteESP32C3_LibsC:\Users\Rob\Documents\Arduino\libraries\BuddySuiteESP32C3_Libs
 void CurrentValuesJB::setup()
 {
@@ -43,26 +43,29 @@ float incValue=incValueIn;
    else if (incValue>0) {incValue = _min(10, incValue);}
    
    uint8_t absIncValue = abs(incValue);
-  
+   boolean hardPush = absIncValue>9;
+   boolean pushRight = incValue>0;
    
   switch(selectedField)
   {
     case 0:  
-            if (absIncValue>8) 
+            if (hardPush) 
             {
-            	tojMl+=incValue/10;
-            	//Serial.println (String ("tojMl=") + String (tojMl) + String(", incValue=") + String(incValue));
+            		if(pushRight) 	{tojMl+=1;}
+            		else 						{tojMl-=1;}
             }
-            else               {tojMl+=incValue/100;} //set increment based on stick excursion
-						
-            
+            else  
+            {
+            	if(pushRight) 		{tojMl+=0.1;}
+            	else 							{tojMl-=0.1;}
+            } 
             tojMl = _max(tojMl, MIN_tojMl); tojMl =_min(tojMl, MAX_tojMl);
+            //Serial.println( String("tojMl=") + String(tojMl));
             break;
-    case 1: deemsRatio+=incValue/100; 
+    case 1: if(pushRight){deemsRatio+=(hardPush?1:0.1);} else {deemsRatio-=(hardPush?1:0.1);}
             deemsRatio= _max(deemsRatio, MIN_DEEMSRATIO); deemsRatio =+ _min(deemsRatio, MAX_DEEMSRATIO);
             break;
-    case 2: pgRatio   -=incValue/2;
-            //Serial.println(pgRatio);
+    case 2: if(pushRight){pgRatio+=(hardPush?10:1);} else {pgRatio-=(hardPush?10:1);}
             pgRatio = _max(pgRatio, MIN_tojMl); pgRatio=_min(pgRatio, MAX_PG);
             break;
     case 3: deemsMg += incValue*abs(incValue); //preserve the sign - or + in the square op
