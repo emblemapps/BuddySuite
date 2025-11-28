@@ -1,3 +1,4 @@
+//28Nov2025
 void LcdHdlr::setup(){tft.init(240, 320);}  //2.0" 320x240 ST7789 TFT}
 
 void LcdHdlr::showStartupSplash()
@@ -22,3 +23,4 @@ void LcdHdlr::drawBitMap(Adafruit_ST7789 tft)
 				void drawRGBBitmap(int16_t x, int16_t y, uint16_t *bitmap, uint8_t *mask, int16_t w, int16_t h);
 				*/
 	}
+
