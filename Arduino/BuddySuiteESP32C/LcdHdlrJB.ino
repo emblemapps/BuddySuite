@@ -1,4 +1,4 @@
-  //27Nov2025
+  //28Nov2025
   //tft.init(320, 240);           //1.3" or 1.54" 240x240 ST7789 TFT:
   //tft.init(240, 280);           //1.69" 280x240 ST7789 TFT:
   //tft.init(135, 240);           //       ST7789 240x135
@@ -46,6 +46,7 @@ void JB_LcdHdlr::setupScreen()
   			tft.setCursor(tft.width() - xMarginRightPixels - olubleStrLenPixels, yOffset); tft.print(olubleStr);
 
   			quasi_StrLenPixels = getStringWidthPixels(&Open_Sans_Italic_23, quasi_Str); //housekeeping for the solubility display update
+  			setSelectedField(0);
 		}
 
 
@@ -62,13 +63,14 @@ void JB_LcdHdlr::updateScreen(CurrentValuesJB & values)
 	tft.setTextColor			 (ST77XX_CYAN, colorTextBG);
 	setSolubilityField     (values);
 	setTotalJuiceGramsField(values);
+	
 
 	
-  	for (int ccc=0;ccc<4; ++ccc)
-		{
-				setSelectedField(ccc);
-				delay(150);
-		}
+//  	for (int ccc=0;ccc<4; ++ccc)
+//		{
+//				setSelectedField(ccc);
+//				delay(150);
+//		}
   
 }
 void JB_LcdHdlr::setSelectedField(uint8_t sel) //0-dJuice Reqd, 1-dRatio g/ml, 2-PG/VG, 3-DMT
@@ -99,8 +101,8 @@ void JB_LcdHdlr::setDjuiceRequiredField(CurrentValuesJB & values)
 			
 			uint16_t outStrLenPixels = getStringWidthPixels(&Open_Sans_Italic_23, outStr);
 			uint16_t mlStrLenPixels  = getStringWidthPixels(&Open_Sans_Italic_23,  mlStr);
-			uint8_t rectXlen = 57;
-			tft.fillRect (tft.width() - textToUnitGapPixels - mlStrLenPixels  - xMarginRightPixels- rectXlen, yOffset-20, rectXlen, 24, colorTextBG );
+			uint8_t rectXlen = 51;
+			tft.fillRect (tft.width() - textToUnitGapPixels - mlStrLenPixels  - xMarginRightPixels- rectXlen, yOffset-20, rectXlen, 24, colorTextBG); //ST77XX_RED colorTextBG
 			tft.setCursor(tft.width() - outStrLenPixels - textToUnitGapPixels - mlStrLenPixels  - xMarginRightPixels, yOffset);
 			tft.print(outStr);  
 	}
