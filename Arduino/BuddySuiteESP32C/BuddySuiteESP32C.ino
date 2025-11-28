@@ -1,16 +1,15 @@
-//27Nov2025
+//28Nov2025
 #include <SPI.h>
 #include <BuddySuiteESP32C3.h>
 //#include <./Pics/picMinty.h>
 //#include <./Pics/picDestiny.h>
 //#include <./Pics/GS850_320x215.h>
-#include <./fonts/Open_Sans_Italic_21.h> 
-#include <./fonts/Open_Sans_Italic_16.h> 
+//#include <./fonts/Open_Sans_Italic_21.h> 
+//#include <./fonts/Open_Sans_Italic_16.h> 
 #include <./fonts/Open_Sans_Italic_23.h> 
 //For ESP -> ST7789 TFT connections, see "Utils" tab
 Utils utils;
 JB_Main jbMain;
-
 
 void setup() {
   Serial.begin(115200);
@@ -20,8 +19,9 @@ void setup() {
 
 void loop() 
 {
-	jbMain.test();
-  delay(5000);
+	//jbMain.test();
+	jbMain.loopJB();
+ // delay(200);
 }
 
 
@@ -164,37 +164,12 @@ void loop()
 //void tftPrintTest() {
 //  tft.setTextWrap(false);
 //  tft.fillScreen(ST77XX_BLACK);
-//  tft.setCursor(0, 30);
-//  tft.setTextColor(ST77XX_RED);
-//  tft.setTextSize(1);
-//  tft.println("Hello World!");
-//  tft.setTextColor(ST77XX_YELLOW);
-//  tft.setTextSize(2);
-//  tft.println("Hello World!");
-//  tft.setTextColor(ST77XX_GREEN);
-//  tft.setTextSize(3);
-//  tft.println("Hello World!");
-//  tft.setTextColor(ST77XX_BLUE);
-//  tft.setTextSize(4);
-//  tft.print(1234.567);
-//  delay(3000);
-//  tft.setCursor(0, 0);
 //  tft.fillScreen(ST77XX_BLACK);
 //  tft.setTextColor(ST77XX_WHITE);
 //  tft.setTextSize(0);
-//  tft.println("Hello World!");
 //  tft.setTextSize(1);
 //  tft.setTextColor(ST77XX_GREEN);
-//  
-//  tft.println(" Want pi?");
-//  tft.println(" ");
 //  tft.print(8675309, HEX); // print 8,675,309 out in HEX!
-//  tft.println(" Print HEX!");
-//  tft.println(" ");
-//  tft.setTextColor(ST77XX_WHITE);
-//  tft.println("Sketch has been");
-//  tft.println("running for: ");
-//  tft.setTextColor(ST77XX_MAGENTA);
 //  tft.print(millis() / 1000);
 //  tft.setTextColor(ST77XX_WHITE);
 //  tft.print(" seconds.");
