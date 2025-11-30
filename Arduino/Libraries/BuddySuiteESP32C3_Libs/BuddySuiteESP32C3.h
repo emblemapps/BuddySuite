@@ -1,176 +1,185 @@
-//28Nov2025
-#include <SPI.h>
-#include <BuddySuiteESP32C3.h>
+//30Nov2025
+#ifndef HEADER_CurrentValuesJB
+#define HEADER_CurrentValuesJB
+enum Solubility {SOLUBLE, PART_SOLUBLE, NOT_SOLUBLE};
+class CurrentValuesJB
+{ 
+public: 
+        void  setTojMl(float tojMl);
+		float getTojMl();
+		float deemsRatio			=0; 	
+		int16_t pgRatio				=0;  //percentage PG
+		float pgMl					=0;
+		float vgMl					=0;
+		uint16_t deemsMg			=0;
+		float totalWeightOfDJuice_g	=0;
+		float weightPg_g			=0;
+		float weightVg_g			=0;
+		void  setup();
+		//uint8_t solubility=0; //0=SOLUBLE, 1=PART_SOLUBLE, 2=NOT_SOLUBLE
+		Solubility solubility;
+		void incrementValue (const int & incValue, uint8_t fieldId);		
+private:	
+		float tojMl					=0; //initialised in the setup
+};
+#endif
+
+
+
+#ifndef HEADER_JBCalc
+#define HEADER_JBCalc
+//given total djuice, deem ratio, and pg/vg ratio, calculate pg, vg and dmt weight
+#define VG_WEIGHTG_PER_ML 1.261
+#define PG_WEIGHTG_PER_ML 1.036 
+class JB_Calc
+{ 
+public: 
+		void setup(); //never called
+		void calculate(CurrentValuesJB & values, boolean Dont_Update_DeemsMg);
+		void calculateForDeemsWeight(CurrentValuesJB & values);
+private:				 
+};
+#endif
+
+#ifndef HEADER_JBMain
+#define HEADER_JBMain
+class JB_Main
+{
+	public:
+			void initJB();
+			void startJB();
+			void loopJB();
+			void test();
+	private:
+};
+#endif
+
+#ifndef HEADER_LcdHdlr
+#define HEADER_LcdHdlr
 //#include <./Pics/picMinty.h>
 //#include <./Pics/picDestiny.h>
 //#include <./Pics/GS850_320x215.h>
 //#include <./fonts/Open_Sans_Italic_21.h> 
 //#include <./fonts/Open_Sans_Italic_16.h> 
-#include <./fonts/Open_Sans_Italic_23.h> 
-//For ESP -> ST7789 TFT connections, see "Utils" tab
-Utils utils;
-JB_Main jbMain;
+//#include <./fonts/Open_Sans_Italic_23.h> 
 
-void setup() {
-  Serial.begin(115200);
-   jbMain.initJB();
-   jbMain.startJB();
-}
+#include <Adafruit_GFX.h>    // Core graphics library
+#include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
+#define TFT_CS        21
+#define TFT_RST       9 // Or set to -1 and connect to Arduino RESET pin
+#define TFT_DC        10
+Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);  
+class LcdHdlr
+{	
+	public: 
+		LcdHdlr(){}
+		void setup();          			//2.0" 320x240 ST7789 TFT}
+		void drawBitMap(Adafruit_ST7789 tft);
+		void showStartupSplash();
+			
+	protected:
+		uint16_t colorTextBG    		  = 0x0004; // 5.6.5 RGB
+		uint32_t colorScreenBG  		  = ST77XX_CYAN;
+		uint16_t colorText1     		  = ST77XX_YELLOW;
+		uint16_t colorText2     		  = 0X7E0;
+		uint32_t colorCursor   	 		  = 0xFAAA;
+		const uint8_t xMarginLeftPixels   = 12 ;
+		const uint8_t xMarginRightPixels  = 12 ;		
+};
+#endif
 
-void loop() 
+#ifndef HEADER_JBLcdHdlr
+#define HEADER_JBLcdHdlr
+class JB_LcdHdlr:public LcdHdlr
 {
-	//jbMain.test();
-	jbMain.loopJB();
- // delay(200);
-}
+	public: 
+		JB_LcdHdlr(){}
+		//void setup();
+		void setupScreen();
+		void updateScreen(CurrentValuesJB & values);
+		void setSelectedField(uint8_t sel); //0-dJuice Reqd, 1-dRatio g/ml, 2-PG/VG, 3-DMT
+		void setJoystickMeter(const int & rawXPos);  //0-4096
+private:
+		const uint8_t xOffsetMg 		  = 148;
+		const uint8_t xOffsetMl           = 150;
+		const uint8_t lineSpacing		  = 30;
+		const uint8_t textToUnitGapPixels = 3 ; //eg 1.3<gap>ml
+		uint16_t 	  olubleStrLenPixels  = 0 ; //set in setupScreen()
+	    uint16_t 	  quasi_StrLenPixels  = 0 ; //set in setupScreen()
+		const String  quasi_Str           = "Quasi-";
+		const String  mlStr 		= "ml"; 
+		const String  olubleStr     = "oluble";
+		
+		float 	 oldTojMl           = 0;
+		float 	 oldDeemsRatio 		= 0; 
+		int16_t  oldPgRatio	 		= 0;
+		uint16_t oldDeemsMg			= 0;
+        uint16_t oldTotalWeightOfDJuice_g = 0;
+		float oldPgMl               = 0;
+		float oldVgMl               = 0;
+		Solubility oldSolubility	= NOT_SOLUBLE;	 //something that mismatches initial setup so we force update to get "Soluble" and not "oluble"
+		
+		void setDjuiceRequiredField	(CurrentValuesJB & values);
+		void setDRatField			(CurrentValuesJB & values);
+		void setPgRatField			(CurrentValuesJB & values);
+		void setPgMlOrVgMlField 	(CurrentValuesJB & values, boolean PG);
+		void setDeemsMgField		(const CurrentValuesJB & values);
+		void setSolubilityField		(const CurrentValuesJB & values);	
+		void setTotalJuiceGramsField(const CurrentValuesJB & values);	
+};
+#endif
+
+#ifndef HEADER_Utils
+#define HEADER_Utils
+class Utils
+{
+	public:
+		void rightJustifyPad(String & mlStr, int16_t reqLen);
+	private:	
+};
+#endif
+
+#ifndef HEADER_JoystickReader
+#define HEADER_JoystickReader
+#define JOYSTICK_X_PIN 2     
+#define JOYSTICK_Y_PIN 3
+class JoystickReader
+{
+	public:
+				
+	    	//void setup();
+			//boolean isCentredYRaw(int joystickInYRaw);
+			//boolean isCentredXRaw(int joystickInXRaw);
+			//boolean isCentredYRaw();
+			//boolean isCentredXRaw();
+			//boolean isCentred();
+			//void getSelectedRow(uint8_t & selectedRow);
+			//void readAndConvertJoystick(const int & incRawX, const int & incRawY);	
+	private:
+            //void makeJoystickMeterString(uint8_t & incX);			
+};
+#endif
+
+#ifndef HEADER_JoystickReaderJB
+#define HEADER_JoystickReaderJB
+class JB_JoystickReader
+{
+	public:
+			void setup();
+			boolean isCentredYRaw(int joystickInYRaw);
+			boolean isCentredXRaw(int joystickInXRaw);
+			boolean isCentredYRaw();
+			boolean isCentredXRaw();
+			//boolean isCentred();
+			void getSelectedRow(uint8_t & selectedRow);
+			void readAndConvertJoystick(const int & incRawX, const int & incRawY);	
+			int getJoystickXMappedVal();
+	private:
+            void makeJoystickMeterString(uint8_t & incX);
+			int joystickXMapped=0;
+			
+};
+#endif
 
 
 
-//void testlines(uint16_t color) {
-//  tft.fillScreen(ST77XX_BLACK);
-//  for (int16_t x=0; x < tft.width(); x+=6) {
-//    tft.drawLine(0, 0, x, tft.height()-1, color);
-//    delay(0);
-//  }
-//  for (int16_t y=0; y < tft.height(); y+=6) {
-//    tft.drawLine(0, 0, tft.width()-1, y, color);
-//    delay(0);
-//  }
-//
-//  tft.fillScreen(ST77XX_BLACK);
-//  for (int16_t x=0; x < tft.width(); x+=6) {
-//    tft.drawLine(tft.width()-1, 0, x, tft.height()-1, color);
-//    delay(0);
-//  }
-//  for (int16_t y=0; y < tft.height(); y+=6) {
-//    tft.drawLine(tft.width()-1, 0, 0, y, color);
-//    delay(0);
-//  }
-//
-//  tft.fillScreen(ST77XX_BLACK);
-//  for (int16_t x=0; x < tft.width(); x+=6) {
-//    tft.drawLine(0, tft.height()-1, x, 0, color);
-//    delay(0);
-//  }
-//  for (int16_t y=0; y < tft.height(); y+=6) {
-//    tft.drawLine(0, tft.height()-1, tft.width()-1, y, color);
-//    delay(0);
-//  }
-//
-//  tft.fillScreen(ST77XX_BLACK);
-//  for (int16_t x=0; x < tft.width(); x+=6) {
-//    tft.drawLine(tft.width()-1, tft.height()-1, x, 0, color);
-//    delay(0);
-//  }
-//  for (int16_t y=0; y < tft.height(); y+=6) {
-//    tft.drawLine(tft.width()-1, tft.height()-1, 0, y, color);
-//    delay(0);
-//  }
-//}
-//
-//void testdrawtext(char *text, uint16_t color) {
-//  tft.setCursor(0, 0);
-//  tft.setTextColor(color);
-//  tft.setTextWrap(true);
-//  tft.print(text);
-//}
-//
-//void testfastlines(uint16_t color1, uint16_t color2) {  //240x320
-//  tft.fillScreen(ST77XX_BLUE);
-//	for (int y=230; y<250; ++y)
-//	{  tft.fillScreen(ST77XX_BLACK);
-//		 tft.setCursor(0, 30); tft.setTextColor(ST77XX_WHITE,ST77XX_BLUE); tft.setTextSize(4); tft.println(String("y=") + String(y));
-//		 tft.drawFastHLine(0, y, tft.width(), color1);
-//		 delay(1000);
-//	}
-////  for (int16_t y=0; y <= tft.height(); y+=20) {
-////    tft.drawFastHLine(0, y, tft.width(), color1);
-////  }
-//////  for (int16_t x=0; x < tft.width(); x+=20) {
-////    tft.drawFastVLine(x, 0, tft.height(), color2);
-////  }
-//}
-//
-//void testdrawrects(uint16_t color) {
-//  tft.fillScreen(ST77XX_BLACK);
-//  for (int16_t x=0; x < tft.width(); x+=6) {
-//    tft.drawRect(tft.width()/2 -x/2, tft.height()/2 -x/2 , x, x, color);
-//  }
-//}
-//
-//void testfillrects(uint16_t color1, uint16_t color2) {
-//  tft.fillScreen(ST77XX_BLACK);
-//  for (int16_t x=tft.width()-1; x > 6; x-=6) {
-//    tft.fillRect(tft.width()/2 -x/2, tft.height()/2 -x/2 , x, x, color1);
-//    tft.drawRect(tft.width()/2 -x/2, tft.height()/2 -x/2 , x, x, color2);
-//  }
-//}
-//
-//void testfillcircles(uint8_t radius, uint16_t color) {
-//  for (int16_t x=radius; x < tft.width(); x+=radius*2) {
-//    for (int16_t y=radius; y < tft.height(); y+=radius*2) {
-//      tft.fillCircle(x, y, radius, color);
-//    }
-//  }
-//}
-//
-//void testdrawcircles(uint8_t radius, uint16_t color) {
-//  for (int16_t x=0; x < tft.width()+radius; x+=radius*2) {
-//    for (int16_t y=0; y < tft.height()+radius; y+=radius*2) {
-//      tft.drawCircle(x, y, radius, color);
-//    }
-//  }
-//}
-//
-//void testtriangles() {
-//  tft.fillScreen(ST77XX_BLACK);
-//  uint16_t color = 0xF800;
-//  int t;
-//  int w = tft.width()/2;
-//  int x = tft.height()-1;
-//  int y = 0;
-//  int z = tft.width();
-//  for(t = 0 ; t <= 15; t++) {
-//    tft.drawTriangle(w, y, y, x, z, x, color);
-//    x-=4;
-//    y+=4;
-//    z-=4;
-//    color+=100;
-//  }
-//}
-//
-//void testroundrects() {
-//  tft.fillScreen(ST77XX_BLACK);
-//  uint16_t color = 100;
-//  int i;
-//  int t;
-//  for(t = 0 ; t <= 4; t+=1) {
-//    int x = 0;
-//    int y = 0;
-//    int w = tft.width()-2;
-//    int h = tft.height()-2;
-//    for(i = 0 ; i <= 16; i+=1) {
-//      tft.drawRoundRect(x, y, w, h, 5, color);
-//      x+=2;
-//      y+=3;
-//      w-=4;
-//      h-=6;
-//      color+=1100;
-//    }
-//    color+=100;
-//  }
-//}
-//
-//void tftPrintTest() {
-//  tft.setTextWrap(false);
-//  tft.fillScreen(ST77XX_BLACK);
-//  tft.fillScreen(ST77XX_BLACK);
-//  tft.setTextColor(ST77XX_WHITE);
-//  tft.setTextSize(0);
-//  tft.setTextSize(1);
-//  tft.setTextColor(ST77XX_GREEN);
-//  tft.print(8675309, HEX); // print 8,675,309 out in HEX!
-//  tft.print(millis() / 1000);
-//  tft.setTextColor(ST77XX_WHITE);
-//  tft.print(" seconds.");
-//}
