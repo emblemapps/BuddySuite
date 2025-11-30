@@ -1,4 +1,4 @@
-//28Nov2025
+//30Nov2025
 CurrentValuesJB valuesJB;
 JB_Calc 	 			jb_calc;
 JB_LcdHdlr 			jb_lcdHandler;
@@ -25,23 +25,19 @@ void JB_Main::startJB()
 void JB_Main::loopJB()
 {
 	joystickReader.getSelectedRow(rowSelected); //0 - dJuice Reqd >  1 - dRatio g/ml > 2 - PG/VG 3 - DMT
-
 	if(rowSelected!=oldRow)
    { 
-//  	Serial.println(String("SelectedRowChanged, new=") + String(rowSelected));
-    jb_lcdHandler.setSelectedField(rowSelected);   
-    oldRow = rowSelected; 
+  	  jb_lcdHandler.setSelectedField(rowSelected);   
+	    oldRow = rowSelected; 
    }
-//
  if(joystickReader.isCentredYRaw() && !joystickReader.isCentredXRaw() )
  {
-		  valuesJB.incrementValue(joystickReader.getJoystickXMappedVal(), rowSelected);
+		 valuesJB.incrementValue(joystickReader.getJoystickXMappedVal(), rowSelected);
 	   if(rowSelected==3){jb_calc.calculateForDeemsWeight(valuesJB);}
 	   else {jb_calc.calculate(valuesJB, false);}
 	   jb_lcdHandler.updateScreen(valuesJB);
  }
-  
- delay(50);
+ delay(30);
  }
 
 
