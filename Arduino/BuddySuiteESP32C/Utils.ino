@@ -1,4 +1,4 @@
-//28Nov2025
+//30Nov2025
 /**
  * Connections
  * ESP32C3  ST7789 Display (currently 320x240)
@@ -11,7 +11,9 @@
  * 3.3V				VCC	red
  * GND				GND	gray
  */
-
+#include "SPIFFS.h" 
+#include <SPIFFS_ImageReader.h> //https://forum.arduino.cc/t/st7789-draw-bmp-files-faster/685758/5
+#include <FS.h>
  void Utils::rightJustifyPad(String & mlStr, int16_t reqLen)
 {
   String spaces(""); String sp(" ");
@@ -23,6 +25,13 @@
     spaces = sp + spaces;
   }
   mlStr = spaces + mlStr;
+ }
+
+
+
+ void readFile(int file)
+ {
+ 	int a=0;
  }
 
 /**
@@ -56,3 +65,52 @@
     int8_t xo 	= pgm_read_byte(&glyph->xOffset),
     int8_t yo  = pgm_read_byte(&glyph->yOffset);
    */
+
+//https://github.com/ThingPulse/minigrafx/blob/master/src/MiniGrafx.cpp#L654
+
+File filey;
+ void testspiffs()
+ {
+	 if(!SPIFFS.begin(true)){
+        Serial.println("An Error has occurred while mounting SPIFFS");
+        return;}
+ 	
+ 	filey = SPIFFS.open("/DRV320x240.bmp"); 
+ 	if (!filey) {Serial.println("file open failed");}
+ 	delay(5000);
+
+ 	
+ //	while (filey.available()) 
+ for(int byteOffset = 0; byteOffset<21; byteOffset++)
+ 	{
+ 		uint8_t one_byte = filey.read();
+ 		//uint16_t two_bytes = read16FromFiley ();
+ 		Serial.println(String("byte ") + String (byteOffset)  + String(" = ") + String(one_byte, HEX));
+ 		delay(1000);
+ 	}	
+ }
+
+uint16_t read16FromFiley () {
+	  uint16_t result;
+  ((uint8_t *)&result)[0] = filey.read(); // LSB
+  ((uint8_t *)&result)[1] = filey.read(); // MSB
+   return result;
+}
+ 
+
+//  uint16_t read16 (fs::File &f) {
+//  uint16_t result;
+//  ((uint8_t *)&result)[0] = f.read(); // LSB
+//  ((uint8_t *)&result)[1] = f.read(); // MSB
+//   return result;
+//}
+
+//uint32_t read32(File &f) 
+//{
+//  uint32_t result;
+//  ((uint8_t *)&result)[0] = f.read(); // LSB
+//  ((uint8_t *)&result)[1] = f.read();
+//  ((uint8_t *)&result)[2] = f.read();
+//  ((uint8_t *)&result)[3] = f.read(); // MSB
+//  return result;
+//}
