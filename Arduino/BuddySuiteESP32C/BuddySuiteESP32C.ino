@@ -1,9 +1,10 @@
-//28Nov2025
+//30Nov2025
 #include <SPI.h>
 #include <BuddySuiteESP32C3.h>
 //#include <./Pics/picMinty.h>
 //#include <./Pics/picDestiny.h>
 //#include <./Pics/GS850_320x215.h>
+//#include <./Pics/splash1.h>
 //#include <./fonts/Open_Sans_Italic_21.h> 
 //#include <./fonts/Open_Sans_Italic_16.h> 
 #include <./fonts/Open_Sans_Italic_23.h> 
@@ -18,10 +19,9 @@ void setup() {
 }
 
 void loop() 
-{
-	//jbMain.test();
+{	
 	jbMain.loopJB();
- // delay(200);
+ //testspiffs(); delay (10000);
 }
 
 
