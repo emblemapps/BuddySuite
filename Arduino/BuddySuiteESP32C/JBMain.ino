@@ -1,8 +1,9 @@
-//30Nov2025
+//5Dec2025
+
+JB_JoystickReader joystickReader; //this order currentVals still isn't seeing joystickreader
 CurrentValuesJB valuesJB;
 JB_Calc 	 			jb_calc;
 JB_LcdHdlr 			jb_lcdHandler;
-JB_JoystickReader joystickReader; 
 uint8_t rowSelected, oldRow=0;
 
 /** called once at startup*/
@@ -21,7 +22,6 @@ void JB_Main::startJB()
   jb_lcdHandler.updateScreen(valuesJB);
 }
 
-
 void JB_Main::loopJB()
 {
 	joystickReader.getSelectedRow(rowSelected); //0 - dJuice Reqd >  1 - dRatio g/ml > 2 - PG/VG 3 - DMT
@@ -30,6 +30,7 @@ void JB_Main::loopJB()
   	  jb_lcdHandler.setSelectedField(rowSelected);   
 	    oldRow = rowSelected; 
    }
+ 
  if(joystickReader.isCentredYRaw() && !joystickReader.isCentredXRaw() )
  {
 		 valuesJB.incrementValue(joystickReader.getJoystickXMappedVal(), rowSelected);
@@ -37,9 +38,8 @@ void JB_Main::loopJB()
 	   else {jb_calc.calculate(valuesJB, false);}
 	   jb_lcdHandler.updateScreen(valuesJB);
  }
- delay(30);
+ delay (20);
  }
-
 
 void JB_Main::test()
 {
