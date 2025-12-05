@@ -1,13 +1,11 @@
 //5Dec2025
-
 #ifndef HEADER_JoystickReader
 #define HEADER_JoystickReader
 #define JOYSTICK_X_PIN 2     
 #define JOYSTICK_Y_PIN 3
 class JoystickReader
 {
-	public:
-				
+	public:		
 	    	 void setup();
 			//boolean isCentredYRaw(int joystickInYRaw);
 			//boolean isCentredXRaw(int joystickInXRaw);
@@ -20,7 +18,6 @@ class JoystickReader
             //void makeJoystickMeterString(uint8_t & incX);			
 };
 #endif
-
 
 #ifndef HEADER_JoystickReaderJB
 #define HEADER_JoystickReaderJB
@@ -45,8 +42,6 @@ class JB_JoystickReader
 			
 };
 #endif
-
-
 
 #ifndef HEADER_CurrentValuesJB
 #define HEADER_CurrentValuesJB
@@ -151,9 +146,8 @@ class JB_LcdHdlr:public LcdHdlr
 		//void setup();
 		void setupScreen();
 		void updateScreen(CurrentValuesJB & values);
-		void setSelectedField(uint8_t sel); //0-dJuice Reqd, 1-dRatio g/ml, 2-PG/VG, 3-DMT
-		
-private:
+		void setSelectedField(uint8_t sel); //0-dJuice Reqd, 1-dRatio g/ml, 2-PG/VG, 3-DMT	
+	private:
 		const uint8_t xOffsetMg 		  = 148;
 		const uint8_t xOffsetMl           = 150;
 		const uint8_t lineSpacing		  = 30;
