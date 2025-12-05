@@ -1,8 +1,8 @@
-//30Nov2025
-// C:\Users\name\Documents\Arduino\libraries\BuddySuiteESP32C3_LibsC:\Users\name\Documents\Arduino\libraries\BuddySuiteESP32C3_Libs
+//5Dec2025
+// C:\Users\Rob\Documents\Arduino\libraries\BuddySuiteESP32C3_LibsC:\Users\Rob\Documents\Arduino\libraries\BuddySuiteESP32C3_Libs
 void CurrentValuesJB::setup()
 {
-    tojMl     = 3; 
+	  tojMl     = 3; 
     deemsRatio= 4;
     pgRatio   = 60;
 //  solubility=SOLUBLE; //others are PART_SOLUBLE, NOT_SOLUBLE
@@ -20,20 +20,17 @@ float CurrentValuesJB::getTojMl()
 {
   return tojMl;
 }
-
 #define MIN_tojMl 0
 #define MAX_tojMl 50
 #define MIN_PG 0
 #define MAX_PG 100
 #define MIN_DEEMSRATIO 0.5
 #define MAX_DEEMSRATIO 20
-
-
-unsigned long millisLastChangedtojMl			=0;
-unsigned long millisLastChangeddeemsRatio	=0;
-unsigned long millisLastChangedpgRatio		=0;
-unsigned long LastChangeddeemsMg					=0;
-const uint16_t joystickIncrementDelayMillis = 150;
+unsigned long  millisLastChangedtojMl				= 0;
+unsigned long  millisLastChangeddeemsRatio	= 0;
+unsigned long  millisLastChangedpgRatio			= 0;
+unsigned long  LastChangeddeemsMg						= 0;
+const uint16_t joystickIncrementDelayMillis = 190;
 
 void CurrentValuesJB::incrementValue (const int & incValueIn, uint8_t selectedField)
 {
@@ -42,38 +39,33 @@ void CurrentValuesJB::incrementValue (const int & incValueIn, uint8_t selectedFi
 	 if(incValue<0) 			{incValue = _max(-10, incValue);}
    else if (incValue>0) {incValue = _min(10, incValue);}
    uint8_t absIncValue = abs(incValue);
-   boolean hardPush 	 = absIncValue>9;
-   boolean mediumPush  = absIncValue<=9 && absIncValue>6;
-   boolean pushRight 	 = incValue   >0;
-   //uint16_t delays=10;
+//   boolean hardPush 	 = absIncValue>9;
+//   boolean mediumPush  = absIncValue<=9 && absIncValue>6;
+     boolean pushRight 	 = incValue   >0;
    switch(selectedField)
   	{
-    	case 0:                                    
-    					if (millisLastChangedtojMl > millis() - joystickIncrementDelayMillis) {break;}
+    	case 0: if (millisLastChangedtojMl > millis() - joystickIncrementDelayMillis) {break;}
     					millisLastChangedtojMl = millis();
-    					if(pushRight){tojMl+=(hardPush?1:0.1);} else {tojMl-=(hardPush?1:0.1);}
+    					if(pushRight){tojMl+=((joystickForce==HARD)?1:0.1);} else {tojMl-=((joystickForce==HARD)?1:0.1);}
             	tojMl = _max(tojMl, MIN_tojMl); tojMl =_min(tojMl, MAX_tojMl);
             	break;
     	case 1: if (millisLastChangeddeemsRatio > millis() - joystickIncrementDelayMillis) {break;}
     					millisLastChangeddeemsRatio = millis();
-    					if(pushRight){deemsRatio+=(hardPush?1:0.1);} else {deemsRatio-=(hardPush?1:0.1);}
+    					if(pushRight){deemsRatio+=((joystickForce==HARD)?1:0.1);} else {deemsRatio-=((joystickForce==HARD)?1:0.1);}
             	deemsRatio= _max(deemsRatio, MIN_DEEMSRATIO); deemsRatio =+ _min(deemsRatio, MAX_DEEMSRATIO);
-            	//delays+=85;
             	break;
     	case 2: if (millisLastChangedpgRatio > millis() - joystickIncrementDelayMillis) {break;}
     					millisLastChangedpgRatio = millis();
-    					if(pushRight){pgRatio-=(hardPush?10:1);} else {pgRatio+=(hardPush?10:1);}
+    					if(pushRight){pgRatio-=((joystickForce==HARD)?10:1);} else {pgRatio+=((joystickForce==HARD)?10:1);}
             	pgRatio = _max(pgRatio, MIN_tojMl); pgRatio=_min(pgRatio, MAX_PG);
-            	//delays+=85;//if(!hardPush){delays+=150;} else{delays+=100;}
             	break;
-    	case 3: //deemsMg += incValue*abs(incValue); //preserve the sign - or + in the square op
-    					if (LastChangeddeemsMg > millis() - joystickIncrementDelayMillis) {break;}
+    	case 3: if (LastChangeddeemsMg > millis() - joystickIncrementDelayMillis) {break;}
     					LastChangeddeemsMg 		= millis();
-    					if(pushRight) {deemsMg+=(hardPush?100:mediumPush?10:1);} else {deemsMg-=(hardPush?100:mediumPush?10:1);}
+    					if(pushRight) {deemsMg+=((joystickForce==HARD)?100:(joystickForce==MEDIUM)?10:1);} else {deemsMg-=((joystickForce==HARD)?100:(joystickForce==MEDIUM)?10:1);}
             	deemsMg = _max(deemsMg, 0); deemsMg=_min(deemsMg, 9999);
             	break;    
   	}
-  delay (5);
+  delay (0);
  ////if ( absIncValue<10) {delay(10);} //so we can knock onto our desired value
  //  if ( absIncValue<8) {delay(50);} //so we can knock onto our desired value
  //  if ( absIncValue<24) {delay(100);} //so we can knock onto our desired value
