@@ -1,4 +1,4 @@
-//30Nov2025
+//5Dec2025
 #include <SPI.h>
 #include <BuddySuiteESP32C3.h>
 //#include <./Pics/picMinty.h>
@@ -14,14 +14,17 @@ JB_Main jbMain;
 
 void setup() {
   Serial.begin(115200);
-   jbMain.initJB();
-   jbMain.startJB();
+  pinMode(1, INPUT_PULLUP);
+  jbMain.initJB();
+  jbMain.startJB();
 }
 
 void loop() 
 {	
 	jbMain.loopJB();
- //testspiffs(); delay (10000);
+ 
+ //boolean hi = digitalRead(1);
+ //Serial.println(String("pin 1=") + String(hi));
 }
 
 
