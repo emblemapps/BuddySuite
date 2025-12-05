@@ -1,21 +1,72 @@
-//30Nov2025
+//5Dec2025
+
+#ifndef HEADER_JoystickReader
+#define HEADER_JoystickReader
+#define JOYSTICK_X_PIN 2     
+#define JOYSTICK_Y_PIN 3
+class JoystickReader
+{
+	public:
+				
+	    	 void setup();
+			//boolean isCentredYRaw(int joystickInYRaw);
+			//boolean isCentredXRaw(int joystickInXRaw);
+			//boolean isCentredYRaw();
+			//boolean isCentredXRaw();
+			//boolean isCentred();
+			//void getSelectedRow(uint8_t & selectedRow);
+			//void readAndConvertJoystick(const int & incRawX, const int & incRawY);	
+	private:
+            //void makeJoystickMeterString(uint8_t & incX);			
+};
+#endif
+
+
+#ifndef HEADER_JoystickReaderJB
+#define HEADER_JoystickReaderJB
+enum JoystickForce {NONE, LIGHT, MEDIUM, HARD};
+JoystickForce joystickForce=NONE;
+class JB_JoystickReader
+{
+	public:
+			void setup();
+			boolean isCentredYRaw(int joystickInYRaw);
+			boolean isCentredXRaw(int joystickInXRaw);
+			boolean isCentredYRaw();
+			boolean isCentredXRaw();
+			//boolean isCentred();
+			void getSelectedRow(uint8_t & selectedRow);
+			void readAndConvertJoystick(const int & incRawX, const int & incRawY);	
+			int getJoystickXMappedVal();
+			//joystickForce = NONE;
+	private:
+            void makeJoystickMeterString(uint8_t & incX);
+			int joystickXMapped=0;
+			
+};
+#endif
+
+
+
 #ifndef HEADER_CurrentValuesJB
 #define HEADER_CurrentValuesJB
 enum Solubility {SOLUBLE, PART_SOLUBLE, NOT_SOLUBLE};
 class CurrentValuesJB
 { 
 public: 
+		//JB_JoystickReader joystickReaderJBin;
         void  setTojMl(float tojMl);
 		float getTojMl();
 		float deemsRatio			=0; 	
 		int16_t pgRatio				=0;  //percentage PG
 		float pgMl					=0;
 		float vgMl					=0;
-		uint16_t deemsMg			=0;
+		int16_t deemsMg				=0;
 		float totalWeightOfDJuice_g	=0;
 		float weightPg_g			=0;
 		float weightVg_g			=0;
-		void  setup();
+		//void setup(JB_JoystickReader & joystickReaderJBinput);
+		void setup();
 		//uint8_t solubility=0; //0=SOLUBLE, 1=PART_SOLUBLE, 2=NOT_SOLUBLE
 		Solubility solubility;
 		void incrementValue (const int & incValue, uint8_t fieldId);		
@@ -23,8 +74,6 @@ private:
 		float tojMl					=0; //initialised in the setup
 };
 #endif
-
-
 
 #ifndef HEADER_JBCalc
 #define HEADER_JBCalc
@@ -76,16 +125,21 @@ class LcdHdlr
 		void setup();          			//2.0" 320x240 ST7789 TFT}
 		void drawBitMap(Adafruit_ST7789 tft);
 		void showStartupSplash();
-			
+		void setJoystickMeter(const int & rawXPos);  //0-4096		
 	protected:
-		uint16_t colorTextBG    		  = 0x0004; // 5.6.5 RGB
-		uint32_t colorScreenBG  		  = ST77XX_CYAN;
-		uint16_t colorText1     		  = ST77XX_YELLOW;
-		uint16_t colorText2     		  = 0X7E0;
-		uint32_t colorCursor   	 		  = 0xFAAA;
-		const uint8_t xMarginLeftPixels   = 12 ;
-		const uint8_t xMarginRightPixels  = 12 ;		
-};
+		const uint16_t colorTextBG_darkBlue	  = 0x0004; // 5.6.5 RGB
+		const uint16_t colorCursor   	 	  = ST77XX_BLUE;
+		const uint16_t colorText1     		  = ST77XX_YELLOW;
+		const uint16_t colorText2     		  = 0X7E0;
+		const uint8_t  xMarginLeftPixels   	  = 12 ;
+		const uint8_t  xMarginRightPixels  	  = 12 ;
+		const uint8_t  joystickMarkerLength	  = 21 ;   
+		const uint8_t  joystickMarkerHeight	  = 8  ;
+		const uint8_t  joystickMarkerYpos 	  = 103;
+		int   xPosMappedOld 				  = 99 ; //somewhere off-screen
+		int   xDispOld 						  = 153; //centre, may need dehackying
+		//unsigned long  millisJoystickMeterLastChanged			= 0;
+		};
 #endif
 
 #ifndef HEADER_JBLcdHdlr
@@ -98,7 +152,7 @@ class JB_LcdHdlr:public LcdHdlr
 		void setupScreen();
 		void updateScreen(CurrentValuesJB & values);
 		void setSelectedField(uint8_t sel); //0-dJuice Reqd, 1-dRatio g/ml, 2-PG/VG, 3-DMT
-		void setJoystickMeter(const int & rawXPos);  //0-4096
+		
 private:
 		const uint8_t xOffsetMg 		  = 148;
 		const uint8_t xOffsetMl           = 150;
@@ -112,9 +166,9 @@ private:
 		
 		float 	 oldTojMl           = 0;
 		float 	 oldDeemsRatio 		= 0; 
-		int16_t  oldPgRatio	 		= 0;
-		uint16_t oldDeemsMg			= 0;
-        uint16_t oldTotalWeightOfDJuice_g = 0;
+		float  	 oldPgRatio	 		= 0;
+		int16_t  oldDeemsMg			= 0;
+        float oldTotalWeightOfDJuice_g = 0;
 		float oldPgMl               = 0;
 		float oldVgMl               = 0;
 		Solubility oldSolubility	= NOT_SOLUBLE;	 //something that mismatches initial setup so we force update to get "Soluble" and not "oluble"
@@ -138,48 +192,3 @@ class Utils
 	private:	
 };
 #endif
-
-#ifndef HEADER_JoystickReader
-#define HEADER_JoystickReader
-#define JOYSTICK_X_PIN 2     
-#define JOYSTICK_Y_PIN 3
-class JoystickReader
-{
-	public:
-				
-	    	//void setup();
-			//boolean isCentredYRaw(int joystickInYRaw);
-			//boolean isCentredXRaw(int joystickInXRaw);
-			//boolean isCentredYRaw();
-			//boolean isCentredXRaw();
-			//boolean isCentred();
-			//void getSelectedRow(uint8_t & selectedRow);
-			//void readAndConvertJoystick(const int & incRawX, const int & incRawY);	
-	private:
-            //void makeJoystickMeterString(uint8_t & incX);			
-};
-#endif
-
-#ifndef HEADER_JoystickReaderJB
-#define HEADER_JoystickReaderJB
-class JB_JoystickReader
-{
-	public:
-			void setup();
-			boolean isCentredYRaw(int joystickInYRaw);
-			boolean isCentredXRaw(int joystickInXRaw);
-			boolean isCentredYRaw();
-			boolean isCentredXRaw();
-			//boolean isCentred();
-			void getSelectedRow(uint8_t & selectedRow);
-			void readAndConvertJoystick(const int & incRawX, const int & incRawY);	
-			int getJoystickXMappedVal();
-	private:
-            void makeJoystickMeterString(uint8_t & incX);
-			int joystickXMapped=0;
-			
-};
-#endif
-
-
-
