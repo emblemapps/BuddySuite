@@ -1,4 +1,4 @@
-//30Nov2025
+//5Dec2025
 void JB_Calc::setup(){}
 
 //float tojMl, deemsRatio, pgRatio, pgMl, vgMl, deemsMg; in AllJuiceBuddy.h
@@ -17,9 +17,9 @@ void JB_Calc::calculate(CurrentValuesJB & jb_values, boolean Dont_Update_DeemsMg
      if (pgSolubilityFactor_gPerMl>2.0){jb_values.solubility=NOT_SOLUBLE;} //red light
      else if ((pgSolubilityFactor_gPerMl>1.2) &&  (pgSolubilityFactor_gPerMl<=2.0) && (jb_values.pgRatio<40)) {jb_values.solubility=PART_SOLUBLE;}//red/amber lights
 
-     jb_values.weightPg_g =  jb_values.pgMl * PG_WEIGHTG_PER_ML;
+     jb_values.weightPg_g = jb_values.pgMl * PG_WEIGHTG_PER_ML;
      jb_values.weightPg_g = (roundf(jb_values.weightPg_g*100))/100.0; //round off to make the total weight field be the sum of the weight fields
-     jb_values.weightVg_g =  jb_values.vgMl * VG_WEIGHTG_PER_ML;
+     jb_values.weightVg_g = jb_values.vgMl * VG_WEIGHTG_PER_ML;
      jb_values.weightVg_g = (roundf(jb_values.weightVg_g*100))/100.0; //round off to make the total weight field be the sum of the weight fields
      jb_values.totalWeightOfDJuice_g= (jb_values.deemsMg/1000.0) + jb_values.weightPg_g + jb_values.weightVg_g;
   }
