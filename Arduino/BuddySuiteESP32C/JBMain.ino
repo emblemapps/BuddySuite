@@ -1,18 +1,20 @@
-//5Dec2025
+//07Dec2025
 
 JB_JoystickReader joystickReader; //this order currentVals still isn't seeing joystickreader
 CurrentValuesJB valuesJB;
 JB_Calc 	 			jb_calc;
 JB_LcdHdlr 			jb_lcdHandler;
+JB_SaveLcdH     jb_SaveScreenHndlr;
 uint8_t rowSelected, oldRow=0;
 
 /** called once at startup*/
 void JB_Main::initJB() 
 {
 	joystickReader.setup();
-	jb_lcdHandler	.setup();
+	jb_lcdHandler	.setup(true);
   jb_calc				.setup();
   valuesJB			.setup();
+	jb_SaveScreenHndlr.setup(false); //showsplash
 }
 
 void JB_Main::startJB()
@@ -20,6 +22,9 @@ void JB_Main::startJB()
 	jb_lcdHandler.setupScreen();
 	jb_calc.calculate(valuesJB, false);
   jb_lcdHandler.updateScreen(valuesJB);
+	delay(1000);
+	jb_SaveScreenHndlr.setupScreen();
+	delay(100000);
 }
 
 void JB_Main::loopJB()
@@ -36,9 +41,14 @@ void JB_Main::loopJB()
 		 valuesJB.incrementValue(joystickReader.getJoystickXMappedVal(), rowSelected);
 	   if(rowSelected==3){jb_calc.calculateForDeemsWeight(valuesJB);}
 	   else {jb_calc.calculate(valuesJB, false);}
-	   jb_lcdHandler.updateScreen(valuesJB);
+	   jb_lcdHandler.updateScreen			(valuesJB);   
  }
- delay (20);
+  jb_lcdHandler.setJoystickMeter(joystickReader.joystickXRaw, valuesJB); 
+
+	//boolean hi = digitalRead(JOYSTICK_PUSHSW_PIN);
+  //Serial.println(String(hi));
+  
+ delay (0);
  }
 
 void JB_Main::test()
