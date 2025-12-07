@@ -1,12 +1,11 @@
-//5Dec2025
+//07Dec2025
 int oldJoystickYRaw=0; 
-int oldJoystickXRaw=0;
+//int oldJoystickXRaw=0;
  
 int joystickXRaw=0;
 int joystickYRaw=0;
 int joystickCentreXMapped=0; int joystickCentreXRaw=0;
 int joystickCentreYMapped=0; int joystickCentreYRaw=0;
-;
 
 void JB_JoystickReader::setup()
 {
@@ -56,7 +55,7 @@ unsigned long  millisSinceRowLastChanged				= 0;
 void JB_JoystickReader::getSelectedRow(uint8_t & selectedRow)
 {
 	joystickXRaw = analogRead(JOYSTICK_X_PIN);  joystickYRaw = analogRead(JOYSTICK_Y_PIN);
-	jb_lcdHandler.setJoystickMeter(joystickXRaw);
+	//jb_lcdHandler.setJoystickMeter(joystickXRaw);
   readAndConvertJoystick				(joystickXRaw, joystickYRaw); //  populate joystickXRaw and joystickYRaw with -10 to +10 ish values
 	
  if (isCentredYRaw(oldJoystickYRaw) && !isCentredYRaw(joystickYRaw)) //has the joystick moved from Y centre?
