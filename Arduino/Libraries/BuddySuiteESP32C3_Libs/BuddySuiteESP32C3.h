@@ -1,4 +1,4 @@
-//5Dec2025
+//07Dec2025
 #ifndef HEADER_JoystickReader
 #define HEADER_JoystickReader
 #define JOYSTICK_X_PIN 2     
@@ -6,14 +6,17 @@
 class JoystickReader
 {
 	public:		
-	    	 void setup();
+			
+	    	void setup();
 			//boolean isCentredYRaw(int joystickInYRaw);
 			//boolean isCentredXRaw(int joystickInXRaw);
 			//boolean isCentredYRaw();
 			//boolean isCentredXRaw();
 			//boolean isCentred();
 			//void getSelectedRow(uint8_t & selectedRow);
-			//void readAndConvertJoystick(const int & incRawX, const int & incRawY);	
+			//void readAndConvertJoystick(const int & incRawX, const int & incRawY);
+    protected:
+			
 	private:
             //void makeJoystickMeterString(uint8_t & incX);			
 };
@@ -26,6 +29,8 @@ JoystickForce joystickForce=NONE;
 class JB_JoystickReader
 {
 	public:
+		    int oldJoystickXRaw=0;
+			int joystickXRaw=0;
 			void setup();
 			boolean isCentredYRaw(int joystickInYRaw);
 			boolean isCentredXRaw(int joystickInXRaw);
@@ -117,10 +122,10 @@ class LcdHdlr
 {	
 	public: 
 		LcdHdlr(){}
-		void setup();          			//2.0" 320x240 ST7789 TFT}
+		void setup(boolean showSplash);          			//2.0" 320x240 ST7789 TFT}
 		void drawBitMap(Adafruit_ST7789 tft);
 		void showStartupSplash();
-		void setJoystickMeter(const int & rawXPos);  //0-4096		
+		void setJoystickMeter(const int & rawXPos, const CurrentValuesJB & values);  //0-4096		
 	protected:
 		const uint16_t colorTextBG_darkBlue	  = 0x0004; // 5.6.5 RGB
 		const uint16_t colorCursor   	 	  = ST77XX_BLUE;
@@ -156,7 +161,8 @@ class JB_LcdHdlr:public LcdHdlr
 	    uint16_t 	  quasi_StrLenPixels  = 0 ; //set in setupScreen()
 		const String  quasi_Str           = "Quasi-";
 		const String  mlStr 		= "ml"; 
-		const String  olubleStr     = "oluble";
+		 const String  olubleStr     = "oluble";
+		//const String  olubleStr     = "ðŸ‘";
 		
 		float 	 oldTojMl           = 0;
 		float 	 oldDeemsRatio 		= 0; 
@@ -183,6 +189,38 @@ class Utils
 {
 	public:
 		void rightJustifyPad(String & mlStr, int16_t reqLen);
+		uint32_t color24to16(uint32_t color888);
 	private:	
+};
+#endif
+
+#ifndef HEADER_JB_Save_LchH
+#define HEADER_JB_Save_LchH
+
+class JB_SaveLcdH: public LcdHdlr
+{
+	public:
+		//void setup();
+		void setupScreen();
+		
+	private:	
+};
+#endif
+
+#ifndef HEADER_LittleFS
+#define HEADER_LittleFS
+#include "LittleFS.h" 
+//#include <SPIFFS_ImageReader.h> //https://forum.arduino.cc/t/st7789-draw-bmp-files-faster/685758/5
+#include <FS.h>
+class LittleFSManager
+{
+	public: 
+			void setup();
+			//void listFiles();
+			void writeTextFile();  //writeTextFile
+			void readFile(String & filename);
+			void listFiles();
+	protected:
+	private:
 };
 #endif
