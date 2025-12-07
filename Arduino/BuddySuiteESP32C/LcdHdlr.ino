@@ -1,8 +1,10 @@
-//5Dec2025
-void LcdHdlr::setup()
+//07Dec2025
+void LcdHdlr::setup(boolean showSplash)
 {
 	tft.init(240, 320);
-	showStartupSplash();
+	if(showSplash) {showStartupSplash();}
+	tft.setFont(&Open_Sans_Italic_23); 	// https://oleddisplay.squix.ch/
+	tft.setRotation(1);
 }  //2.0" 320x240 ST7789 TFT}
 
 void LcdHdlr::showStartupSplash()
@@ -10,18 +12,15 @@ void LcdHdlr::showStartupSplash()
 		drawBitMap(tft);//2 secdelay built in		
 }
 #include <./Pics/splash1.h>
+#include <./Pics/picSave_26x26.h>
+#include <./Pics/thumbsup_23x24.h>
 void LcdHdlr::drawBitMap(Adafruit_ST7789 tft)
 	{
 				tft.fillScreen(ST77XX_BLACK);
 				tft.setRotation(1);
 				tft.drawRGBBitmap(0, 0, splash1, 320,240);
 				delay (2000);
-				
-				//tft.fillScreen(ST77XX_BLACK);
-				//tft.drawRGBBitmap(0, 0, bitmap_DestinyVideo320_170, 320,170);
-				//delay (10000);
 				tft.fillScreen(ST77XX_BLACK);
-			   //tft.drawRGBBitmap(0, 0, lcd_gs850, 320,215);
 				/**Many more drawbitmap functs in Adafruit_gfx.h
 				void drawRGBBitmap(int16_t x, int16_t y, const uint16_t bitmap[], int16_t w, int16_t h);
 				void drawRGBBitmap(int16_t x, int16_t y, uint16_t *bitmap, int16_t w, int16_t h);
@@ -30,8 +29,7 @@ void LcdHdlr::drawBitMap(Adafruit_ST7789 tft)
 				*/
 	}
 
-
-void LcdHdlr::setJoystickMeter(const int & rawXPos)
+void LcdHdlr::setJoystickMeter(const int & rawXPos, const CurrentValuesJB & values)
 {
 	int xPosMapped = 0;
 	if (!(rawXPos < joystickCentreXRaw-250)  && !(rawXPos >joystickCentreXRaw+250))
@@ -42,8 +40,9 @@ void LcdHdlr::setJoystickMeter(const int & rawXPos)
 	else if(rawXPos<joystickCentreXRaw) {xPosMapped = map(rawXPos,20, joystickCentreXRaw, 1,13);} //not centre, joystick leftgoing  from centre
 
 // 1 2 3 4 5 6 7 8 9 a b c |d| c b a 9 8 7 6 5 4 3 2 1
-	if 	(xPosMapped==xPosMappedOld) {return;}
-			 xPosMappedOld = xPosMapped;
+	
+
+			 //Serial.println(String("xPosMapped=") + String(xPosMapped) + String(", xPosMappedOld=") + String(xPosMappedOld));
 
   uint16_t xDisp=1000; //somewhere off display
   switch(xPosMapped)
@@ -55,12 +54,27 @@ void LcdHdlr::setJoystickMeter(const int & rawXPos)
 		case 15: case 17: case 19: case 21: case 23: xDisp = ((tft.width()/2) - (joystickMarkerLength/2)) + ((joystickMarkerLength + 2) * (((xPosMapped%14)+1)/2)); break;
 		case 11: case 9:  case  7: case  5: case 3 : xDisp = ((tft.width()/2) - (joystickMarkerLength/2)) - ((joystickMarkerLength + 2) * (((12-xPosMapped)+1)/2)); break;
 	}
+if 	(xPosMapped==xPosMappedOld) {return;}
+			 xPosMappedOld = xPosMapped;
+	
+	uint16_t markerColor=0xd800; //see https://rgbcolorpicker.com/565
+		
+	switch (abs(xPosMapped -13))
+	{
+//		case 0 : markerColor =ST77XX_RED; break;
+//		case 2 : markerColor = 0xd80f   ; break;
+//		case 4 : markerColor = 0xe815   ; break;
+			case 6 : markerColor = ST77XX_RED   ; break;
+  		case 8 : markerColor = 0xe813   ; break; 
+  		case 10: markerColor = 0xec16   ; break;
+		  case 12: markerColor = 0xfcff   ; break;  //0xfcff
+	}
 	//Serial.println (String("xposMapped=") + String(xPosMapped)+ String(",  xDisp=") + String(xDisp));
-	uint16_t markerColor=ST77XX_RED;
+	//uint16_t markerColor=ST77XX_RED + ((abs(xPosMapped -13)*4)); //see https://rgbcolorpicker.com/565
 	//markerColor += ((abs(xPosMapped-8)) * 0xb0);
 	tft.fillRect		 (xDispOld, joystickMarkerYpos,   joystickMarkerLength, joystickMarkerHeight, colorTextBG_darkBlue); //clear old
-  tft.drawFastHLine(xDispOld, joystickMarkerYpos+1, joystickMarkerLength, colorText1); //short green  line to replace upper border fragment
-  tft.drawFastHLine(xDispOld, joystickMarkerYpos+5, joystickMarkerLength, colorText2); //short yellow line to replace lower border fragment
+  tft.drawFastHLine(xDispOld, joystickMarkerYpos+1, joystickMarkerLength, colorText1); //short yellow  line to replace upper border fragment
+  tft.drawFastHLine(xDispOld, joystickMarkerYpos+5, joystickMarkerLength, (values.solubility==NOT_SOLUBLE?ST77XX_RED:values.solubility==PART_SOLUBLE?0xFE00:colorText2)); //short yellow line to replace lower border fragment
   tft.fillRect		 (xDisp,    joystickMarkerYpos,   joystickMarkerLength, joystickMarkerHeight, markerColor); //just to centre and get the right spread of the display
   xDispOld = xDisp;
 }  
