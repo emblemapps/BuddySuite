@@ -1,4 +1,4 @@
-//5Dec2025
+//07Dec2025
 /**
  * Connections
  * ESP32C3  ST7789 Display (currently 320x240)
@@ -25,13 +25,24 @@
     spaces = sp + spaces;
   }
   mlStr = spaces + mlStr;
- }
+}
 
-
+/***************************************************************************************
+* Stolen from tft_eSPI.cpp
+* Function name:           color24to16
+* Description:             convert 24-bit colour to a 16-bit 565 colour value  ffffff
+***************************************************************************************/
+uint32_t Utils::color24to16(uint32_t color888)
+{
+  uint16_t r = (color888 >> 8) & 0xF800;
+  uint16_t g = (color888 >> 5) & 0x07E0;
+  uint16_t b = (color888 >> 3) & 0x001F;
+  return (r | g | b);
+}
 
  void readFile(int file)
  {
- 	int a=0;
+ 	    int a=0;
  }
 
 /**
