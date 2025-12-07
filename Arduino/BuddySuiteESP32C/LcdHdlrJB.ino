@@ -1,18 +1,12 @@
-  //5Dec2025
-  //tft.init(320, 240);           //1.3" or 1.54" 240x240 ST7789 TFT:
-  //tft.init(240, 280);           //1.69" 280x240 ST7789 TFT:
-  //tft.init(135, 240);           //       ST7789 240x135
-  //tft.init(172, 320);           // 1.47" 172x320 ST7789 TFT:
-  //tft.init(170, 320);           // 1.9"  170x320 ST7789 TFT
+//07Dec2025
   // SPI speed defaults to SPI_DEFAULT_FREQ defined in the library, you can override it here
   // Allowable spped depends on chip & wiring Too fast may get you a black screen some times, continuous.
   //tft.setSPISpeed(40000000);
 
-  
 void JB_LcdHdlr::setupScreen()
 		{		
-				tft.setFont(&Open_Sans_Italic_23); 	// https://oleddisplay.squix.ch/
-				tft.setRotation(1);
+				//tft.setFont(&Open_Sans_Italic_23); 	// https://oleddisplay.squix.ch/
+				//tft.setRotation(1);
 				tft.fillScreen(colorTextBG_darkBlue);
 				//////////////////////////////////////////////////////////////////////////////////
 				tft.drawRoundRect(0, 0, 	tft.width(), tft.height()-135, 10, colorText1);  //border line top
@@ -57,7 +51,7 @@ void JB_LcdHdlr::updateScreen(CurrentValuesJB & values)
 	setDRatField 					 (values);
 	setPgRatField					 (values);
 	tft.setTextColor		   (colorText2, colorTextBG_darkBlue); 
-	setPgMlOrVgMlField     (values, true );
+	setPgMlOrVgMlField     (values, true);
 	setPgMlOrVgMlField     (values, false);
 	setDeemsMgField        (values);
 	tft.setTextColor			 (ST77XX_CYAN, colorTextBG_darkBlue);
@@ -179,21 +173,19 @@ void JB_LcdHdlr::setDRatField(CurrentValuesJB & values)
 			//solubility=NOT_SOLUBLE;
 			String solStr = "S"; String upperLineString = "";
 			switch(values.solubility)
-  		{ /*#define ST77XX_ORANGE 0xFC00  1111 1100 0000 0000
-  																			11111 100000 00000
-  																			11111 110000 00000
-  																			1111 1110 0000 0000*/ 
+  		{  
     		case PART_SOLUBLE:  upperLineString = quasi_Str; tft.drawRoundRect(0, 108, tft.width(), tft.height()-110, 10, 0xFE00);	break;
-    		case SOLUBLE:       tft.drawRoundRect(0, 108, tft.width(), tft.height()-110, 10, colorText2);																	break;
-    		case NOT_SOLUBLE:   solStr = "Ins";  tft.drawRoundRect(0, 108, tft.width(), tft.height()-110, 10, ST77XX_RED);								break;
-    		default:            																																																					break;
+    		case SOLUBLE:       tft.drawRoundRect(0, 108, tft.width(), tft.height()-110, 10, colorText2);														break;
+    		case NOT_SOLUBLE:   solStr = "Ins";  tft.drawRoundRect(0, 108, tft.width(), tft.height()-110, 10, ST77XX_RED);					break;
+    		default:            																																																		break;
   		}	
    		uint16_t  strLenPixels = getStringWidthPixels(&Open_Sans_Italic_23,solStr);
-   		uint8_t 	xrectXlen 	 = 35;
+   		uint8_t 	xrectXlen 	 = 40;//35
   		tft.fillRect (tft.width() - xMarginRightPixels - olubleStrLenPixels - xrectXlen,    yOffset-20,  xrectXlen, 24, colorTextBG_darkBlue); //ST77XX_RED colorTextBG_darkBlue
   		tft.setCursor(tft.width()	- xMarginRightPixels - olubleStrLenPixels - strLenPixels, yOffset); 	tft.print(solStr); 
-	  	xrectXlen = 	quasi_StrLenPixels+5;
+	  	xrectXlen =   quasi_StrLenPixels+5;
   		tft.fillRect (tft.width() - xMarginRightPixels - xrectXlen, yOffset-27-20,  xrectXlen, 24, colorTextBG_darkBlue); //ST77XX_RED colorTextBG_darkBlue
+  		if(values.solubility==SOLUBLE) {tft.drawRGBBitmap(200,205, thumbsup_23x24, 23,24);}
   		tft.setCursor(tft.width() - xMarginRightPixels - quasi_StrLenPixels, yOffset-27); 					  tft.print(upperLineString); 
  	}
  		
@@ -205,7 +197,7 @@ void JB_LcdHdlr::setTotalJuiceGramsField(const CurrentValuesJB & values)
 	float totalWeightOfDJuice_g = values.totalWeightOfDJuice_g;
 	String out=String(totalWeightOfDJuice_g,(totalWeightOfDJuice_g>=10?1:2));
 	uint16_t 	strLenPixels = getStringWidthPixels(&Open_Sans_Italic_23,out);
-	uint8_t  rectXlen = 60;
+	uint8_t   rectXlen     = 60;
 	tft.fillRect (xOffsetMg - rectXlen-textToUnitGapPixels,	yOffset-21, rectXlen, 24, colorTextBG_darkBlue); //ST77XX_RED
   tft.setCursor(xOffsetMg-strLenPixels-textToUnitGapPixels, yOffset); 				tft.print(out);
 }		
