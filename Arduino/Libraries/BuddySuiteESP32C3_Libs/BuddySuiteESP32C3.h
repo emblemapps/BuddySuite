@@ -1,51 +1,104 @@
-//07Dec2025
+//19Dec2025
 #ifndef HEADER_JoystickReader
 #define HEADER_JoystickReader
 #define JOYSTICK_X_PIN 2     
 #define JOYSTICK_Y_PIN 3
+
+enum JoystickForce {NONE, LIGHT, MEDIUM, HARD};
+JoystickForce joystickForce=NONE;
 class JoystickReader
 {
 	public:		
+			int joystickCentreXRaw	 =0;
+			boolean hasBeenCalibrated= false;
+			void setup()   //calibrate centres on power up
+			{
+				if(!hasBeenCalibrated)
+				{
+					joystickCentreXRaw=analogRead(JOYSTICK_X_PIN);
+					joystickCentreYRaw=analogRead(JOYSTICK_Y_PIN);
+					hasBeenCalibrated=true;
+				}
+				oldJoystickXRaw=joystickCentreXRaw;
+				oldJoystickYRaw=joystickCentreYRaw;				
+			}
+			boolean isCentredYRaw(int joystickInYRaw)
+			{
+				if(joystickInYRaw<=joystickCentreYRaw-550 || joystickInYRaw>=joystickCentreYRaw+550)
+				{return false;}
+				return true;
+			}
+			boolean isCentredYRaw()
+			{
+				return isCentredYRaw(analogRead(JOYSTICK_Y_PIN));
+			}
 			
-	    	void setup();
-			//boolean isCentredYRaw(int joystickInYRaw);
-			//boolean isCentredXRaw(int joystickInXRaw);
-			//boolean isCentredYRaw();
-			//boolean isCentredXRaw();
-			//boolean isCentred();
-			//void getSelectedRow(uint8_t & selectedRow);
-			//void readAndConvertJoystick(const int & incRawX, const int & incRawY);
+			boolean isCentredXRaw(int joystickInXRaw)
+			{
+				if(joystickInXRaw<=joystickCentreXRaw-300 || joystickInXRaw>=joystickCentreXRaw+300)
+				{return false;}
+				return true;
+			}
+			boolean isCentredXRaw()
+			{
+				return isCentredXRaw(analogRead(JOYSTICK_X_PIN));
+			}
+			int getJoystickXRaw()
+			{
+				return joystickXRaw;
+			}
+			int getJoystickXMappedVal()
+			{
+				return joystickXMapped;
+			}				
     protected:
-			
-	private:
-            //void makeJoystickMeterString(uint8_t & incX);			
+			int oldJoystickXRaw=0;
+			int oldJoystickYRaw=0;
+			int joystickXRaw   =0;	
+			int joystickYRaw   =0;
+			int joystickXMapped=0;	
+			int joystickCentreXMapped=0; 
+			int joystickCentreYRaw	 =0;
+	private:			
 };
 #endif
 
 #ifndef HEADER_JoystickReaderJB
 #define HEADER_JoystickReaderJB
-enum JoystickForce {NONE, LIGHT, MEDIUM, HARD};
-JoystickForce joystickForce=NONE;
-class JB_JoystickReader
+class JB_JoystickReader : public JoystickReader
+{
+	public: 
+			void getSelectedRow();
+			void readAndConvertJoystickX(const int & incRawX);	
+	private:
+			unsigned long  millisSinceRowLastChanged = 0;	
+};
+#endif
+
+#ifndef HEADER_JoystickReaderJBSAV
+#define HEADER_JoystickReaderJBSAV
+class JBSAV_JoystickReader : public JoystickReader
+{
+	public: 
+			void getSelectedRow();
+			void readAndConvertJoystickX(const int & incRawX);	
+	private:
+			unsigned long  millisSinceRowLastChanged = 0;	
+};
+#endif
+
+#ifndef HEADER_JoystickPushSwReader
+#define HEADER_JoystickPushSwReader
+#define JOYSTICK_PUSHSW_PIN 1
+class JoystickPushSwitchReader : public JoystickReader
 {
 	public:
-		    int oldJoystickXRaw=0;
-			int joystickXRaw=0;
 			void setup();
-			boolean isCentredYRaw(int joystickInYRaw);
-			boolean isCentredXRaw(int joystickInXRaw);
-			boolean isCentredYRaw();
-			boolean isCentredXRaw();
-			//boolean isCentred();
-			void getSelectedRow(uint8_t & selectedRow);
-			void readAndConvertJoystick(const int & incRawX, const int & incRawY);	
-			int getJoystickXMappedVal();
-			//joystickForce = NONE;
-	private:
-            void makeJoystickMeterString(uint8_t & incX);
-			int joystickXMapped=0;
-			
+			void checkForSwitchPush();
+	private: 
+			void sendPushSwitchNotification();
 };
+
 #endif
 
 #ifndef HEADER_CurrentValuesJB
@@ -54,8 +107,7 @@ enum Solubility {SOLUBLE, PART_SOLUBLE, NOT_SOLUBLE};
 class CurrentValuesJB
 { 
 public: 
-		//JB_JoystickReader joystickReaderJBin;
-        void  setTojMl(float tojMl);
+		void  setTojMl(float tojMl);
 		float getTojMl();
 		float deemsRatio			=0; 	
 		int16_t pgRatio				=0;  //percentage PG
@@ -65,11 +117,10 @@ public:
 		float totalWeightOfDJuice_g	=0;
 		float weightPg_g			=0;
 		float weightVg_g			=0;
-		//void setup(JB_JoystickReader & joystickReaderJBinput);
-		void setup();
-		//uint8_t solubility=0; //0=SOLUBLE, 1=PART_SOLUBLE, 2=NOT_SOLUBLE
+		void  setup();
 		Solubility solubility;
-		void incrementValue (const int & incValue, uint8_t fieldId);		
+		void incrementValue (const int & incValue, uint8_t fieldId);
+		String toString();
 private:	
 		float tojMl					=0; //initialised in the setup
 };
@@ -98,6 +149,8 @@ class JB_Main
 			void initJB();
 			void startJB();
 			void loopJB();
+			void loop();
+			void loopJBSav();
 			void test();
 	private:
 };
@@ -117,18 +170,22 @@ class JB_Main
 #define TFT_CS        21
 #define TFT_RST       9 // Or set to -1 and connect to Arduino RESET pin
 #define TFT_DC        10
-Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);  
+const uint16_t colorTextBG_darkBlue	  = 0x0004; // 5.6.5 RGB
+Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST); 
+enum ScreenShowing{JB, JBSAV}; 
 class LcdHdlr
 {	
 	public: 
 		LcdHdlr(){}
+		ScreenShowing screenShowing;
 		void setup(boolean showSplash);          			//2.0" 320x240 ST7789 TFT}
 		void drawBitMap(Adafruit_ST7789 tft);
 		void showStartupSplash();
-		void setJoystickMeter(const int & rawXPos, const CurrentValuesJB & values);  //0-4096		
+		void setJoystickMeter(const int & rawXPos, const CurrentValuesJB & values);  //0-4096	
+				
 	protected:
 		const uint16_t colorTextBG_darkBlue	  = 0x0004; // 5.6.5 RGB
-		const uint16_t colorCursor   	 	  = ST77XX_BLUE;
+		const uint16_t colorCursor   	 	  = 0x29F; //ST77XX_BLUE;
 		const uint16_t colorText1     		  = ST77XX_YELLOW;
 		const uint16_t colorText2     		  = 0X7E0;
 		const uint8_t  xMarginLeftPixels   	  = 12 ;
@@ -136,6 +193,7 @@ class LcdHdlr
 		const uint8_t  joystickMarkerLength	  = 21 ;   
 		const uint8_t  joystickMarkerHeight	  = 8  ;
 		const uint8_t  joystickMarkerYpos 	  = 103;
+		const uint8_t  lineSpacing		 	  = 30 ;
 		int   xPosMappedOld 				  = 99 ; //somewhere off-screen
 		int   xDispOld 						  = 153; //centre, may need dehackying
 		//unsigned long  millisJoystickMeterLastChanged			= 0;
@@ -146,31 +204,30 @@ class LcdHdlr
 #define HEADER_JBLcdHdlr
 class JB_LcdHdlr:public LcdHdlr
 {
-	public: 
+	public: 		
 		JB_LcdHdlr(){}
 		//void setup();
 		void setupScreen();
-		void updateScreen(CurrentValuesJB & values);
+		void updateScreen(CurrentValuesJB & values, boolean updateAll);
 		void setSelectedField(uint8_t sel); //0-dJuice Reqd, 1-dRatio g/ml, 2-PG/VG, 3-DMT	
 	private:
+		boolean updateAll = false;
 		const uint8_t xOffsetMg 		  = 148;
 		const uint8_t xOffsetMl           = 150;
-		const uint8_t lineSpacing		  = 30;
+		
 		const uint8_t textToUnitGapPixels = 3 ; //eg 1.3<gap>ml
 		uint16_t 	  olubleStrLenPixels  = 0 ; //set in setupScreen()
 	    uint16_t 	  quasi_StrLenPixels  = 0 ; //set in setupScreen()
-		const String  quasi_Str           = "Quasi-";
+		const String  quasi_Str     = "Quasi-";
 		const String  mlStr 		= "ml"; 
-		 const String  olubleStr     = "oluble";
-		//const String  olubleStr     = "ðŸ‘";
-		
+		const String  olubleStr     = "oluble";
 		float 	 oldTojMl           = 0;
 		float 	 oldDeemsRatio 		= 0; 
 		float  	 oldPgRatio	 		= 0;
 		int16_t  oldDeemsMg			= 0;
-        float oldTotalWeightOfDJuice_g = 0;
-		float oldPgMl               = 0;
-		float oldVgMl               = 0;
+		float 	 oldPgMl            = 0;
+		float 	 oldVgMl            = 0;
+        float 	 oldTotalWeightOfDJuice_g = 0;
 		Solubility oldSolubility	= NOT_SOLUBLE;	 //something that mismatches initial setup so we force update to get "Soluble" and not "oluble"
 		
 		void setDjuiceRequiredField	(CurrentValuesJB & values);
@@ -190,20 +247,30 @@ class Utils
 	public:
 		void rightJustifyPad(String & mlStr, int16_t reqLen);
 		uint32_t color24to16(uint32_t color888);
+		String makeDRatString (const CurrentValuesJB & valuesJB);
+		String makeDratString (const float drat);
 	private:	
 };
 #endif
 
 #ifndef HEADER_JB_Save_LchH
 #define HEADER_JB_Save_LchH
-
 class JB_SaveLcdH: public LcdHdlr
 {
 	public:
 		//void setup();
-		void setupScreen();
-		
-	private:	
+		void setupScreen(CurrentValuesJB & valuesJB);
+		void loopJbSav();
+		void setSelectedRow(int selectedRow);
+		void joystickMoveX(boolean toRight);
+		void doClick();
+	private:
+			unsigned long timeStarted;
+			unsigned long maxIdleDuration =  10 * 1000; //60 secs for now
+			void displaySaveLocationsFramework();
+			void populateSaveLocationsArray();
+			void displaySaveLocationsStrings();
+			void printCurrentSettingsString(CurrentValuesJB & valuesJB);
 };
 #endif
 
@@ -216,11 +283,53 @@ class LittleFSManager
 {
 	public: 
 			void setup();
-			//void listFiles();
-			void writeTextFile();  //writeTextFile
-			void readFile(String & filename);
-			void listFiles();
+			void deleteFile(String & filenameIn);
+			void writeTextFile(String & Filename, String & text2Write);  //writeTextFile
+			String readFile(String & filename);
+			void listSavFiles(String (& params) [5]);
 	protected:
 	private:
 };
+#endif
+
+#ifndef HEADER_SaveLocation
+#define HEADER_SaveLocation
+//#include <SPIFFS_ImageReader.h> //https://forum.arduino.cc/t/st7789-draw-bmp-files-faster/685758/5
+
+class SaveLocation
+{
+	public: 
+			SaveLocation(String filenameIn, int yPosIn);
+			void loadFile();  // sets the three calc variables of the current valuesJb
+			void saveFile();
+			void deleteFile();
+			void setValues(float (& valsArray) []);
+			void printDisplayString();
+			//void refreshButtonString();
+			void printButtonString();
+			void printButtonString(uint16_t color);
+			uint8_t buttonStringIndex = 0;
+			void joystickMoveX(boolean right);
+			void select();
+			void unSelect();
+			void doClick();
+			boolean isEmpty=true;
+			void   clear();
+			String filename="";
+			String saveString = "";
+			void   setDisplayString(String displayStringIn);
+			float  tojMl=0;
+			float  deemsRatio = 0;
+			int16_t pgRatio=0;
+	protected:
+	private:
+				String buttonStrDisplayed="save";
+				String displayString ="";
+				void makeDisplayString();
+				void setCursorForButtonString();
+				void animateButtonProgressBar();
+				int yPos;
+				int xPos=49;	
+};
+SaveLocation saveLocations [] = {SaveLocation("jb1.sav", 110), SaveLocation("jb2.sav",140), SaveLocation("jb3.sav", 170), SaveLocation("jb4.sav", 200), SaveLocation("jb5.sav", 230)};
 #endif
