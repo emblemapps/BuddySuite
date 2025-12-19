@@ -1,4 +1,4 @@
-//07Dec2025
+//19Dec2025
 void LcdHdlr::setup(boolean showSplash)
 {
 	tft.init(240, 320);
@@ -14,6 +14,8 @@ void LcdHdlr::showStartupSplash()
 #include <./Pics/splash1.h>
 #include <./Pics/picSave_26x26.h>
 #include <./Pics/thumbsup_23x24.h>
+#include <./Pics/thumbsdown_23x24.h>
+
 void LcdHdlr::drawBitMap(Adafruit_ST7789 tft)
 	{
 				tft.fillScreen(ST77XX_BLACK);
@@ -32,12 +34,12 @@ void LcdHdlr::drawBitMap(Adafruit_ST7789 tft)
 void LcdHdlr::setJoystickMeter(const int & rawXPos, const CurrentValuesJB & values)
 {
 	int xPosMapped = 0;
-	if (!(rawXPos < joystickCentreXRaw-250)  && !(rawXPos >joystickCentreXRaw+250))
+	if (joystickReaderJB.isCentredXRaw(rawXPos))
 		{
 			xPosMapped=13;		//centre
   	}
-	else if(rawXPos>joystickCentreXRaw) {xPosMapped = map(rawXPos,    joystickCentreXRaw, 4095, 13,25);} //not centre, joystick rightgoing from centre
-	else if(rawXPos<joystickCentreXRaw) {xPosMapped = map(rawXPos,20, joystickCentreXRaw, 1,13);} //not centre, joystick leftgoing  from centre
+	else if(rawXPos>joystickReaderJB.joystickCentreXRaw) {xPosMapped = map(rawXPos,    joystickReaderJB.joystickCentreXRaw, 4095, 13,25);} //not centre, joystick rightgoing from centre
+	else if(rawXPos<joystickReaderJB.joystickCentreXRaw) {xPosMapped = map(rawXPos,20, joystickReaderJB.joystickCentreXRaw, 1,13);} //not centre, joystick leftgoing  from centre
 
 // 1 2 3 4 5 6 7 8 9 a b c |d| c b a 9 8 7 6 5 4 3 2 1
 	
@@ -69,9 +71,7 @@ if 	(xPosMapped==xPosMappedOld) {return;}
   		case 10: markerColor = 0xec16   ; break;
 		  case 12: markerColor = 0xfcff   ; break;  //0xfcff
 	}
-	//Serial.println (String("xposMapped=") + String(xPosMapped)+ String(",  xDisp=") + String(xDisp));
-	//uint16_t markerColor=ST77XX_RED + ((abs(xPosMapped -13)*4)); //see https://rgbcolorpicker.com/565
-	//markerColor += ((abs(xPosMapped-8)) * 0xb0);
+	
 	tft.fillRect		 (xDispOld, joystickMarkerYpos,   joystickMarkerLength, joystickMarkerHeight, colorTextBG_darkBlue); //clear old
   tft.drawFastHLine(xDispOld, joystickMarkerYpos+1, joystickMarkerLength, colorText1); //short yellow  line to replace upper border fragment
   tft.drawFastHLine(xDispOld, joystickMarkerYpos+5, joystickMarkerLength, (values.solubility==NOT_SOLUBLE?ST77XX_RED:values.solubility==PART_SOLUBLE?0xFE00:colorText2)); //short yellow line to replace lower border fragment
