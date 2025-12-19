@@ -1,14 +1,20 @@
-//07Dec2025
+//19Dec2025
+
 // C:\Users\Rob\Documents\Arduino\libraries\BuddySuiteESP32C3_LibsC:\Users\Rob\Documents\Arduino\libraries\BuddySuiteESP32C3_Libs
 void CurrentValuesJB::setup()
 {
 	  tojMl     = 3; 
     deemsRatio= 4;
     pgRatio   = 60;
-//  solubility=SOLUBLE; //others are PART_SOLUBLE, NOT_SOLUBLE
-//  pgMl    =0;
-//  vgMl    =0;  these values are calculated
-//  deemsMg =0;
+}
+
+String CurrentValuesJB::toString()
+{
+	String outStr = utils.makeDRatString(*this);
+	String ret = String(tojMl,1) + String ("ml ") + String(outStr) + String(" " )  
+	+ String(pgRatio) + String("/") + String(100-pgRatio); 
+	//String ret= "hello";
+	return ret;
 }
 
 void CurrentValuesJB::setTojMl(float tojMlin)
