@@ -1,4 +1,4 @@
-//07Dec2025
+//19Dec2025
 //https://randomnerdtutorials.com/esp32-write-data-littlefs-arduino/
 #define FORMAT_LITTLEFS_IF_FAILED true
 
@@ -11,72 +11,68 @@ void LittleFSManager:: setup()
    //LittleFS.format() ;
 }
 
-void LittleFSManager::readFile(String & filename)
+
+//String readFile(String & filename);
+String LittleFSManager::readFile(String & filenameIn)
 {
+String filename = String("/") + filenameIn;
 File file = LittleFS.open(filename, "r");
+String ret="";
  if(!file || file.isDirectory()){
-        Serial.println("- failed to open file for reading");
-        return;
+        //Serial.println(String("- failed to open file for reading, ") + String(filename));
+        return ret;
     }
-  //vector<String> v;
   while (file.available()) 
   {
-    //Serial.println(file.readStringUntil('t'));
-    Serial.println(file.readString());
+    ret+=file.readString();
+     //Serial.println(String(filename) + String("=")  + ret);
   }
   file.close();
+  return ret;
 }
 
-void LittleFSManager:: listFiles()
+/**
+Populate String array "filenames" with files that have names
+starting with "jb" and end with ".sav£, e.g. jb1.sav
+ */
+void LittleFSManager::listSavFiles(String (& fileNames) [5])
 {
-	Serial.println("listFiles littleFS....");
 	File root = LittleFS.open("/");
   File file = root.openNextFile();
- 
+  uint8_t fileNum=0;
   while(file)
-  {
-      Serial.print("FILE: ");
-      Serial.println(file.name());
-      file = root.openNextFile();
+  { 
+    //jb1.sav to jb5.sav
+    String currFileName(file.name());
+     if (currFileName.endsWith(".sav") &&  currFileName.startsWith("jb"))
+     {
+        int fileNum  = (currFileName.substring(currFileName.indexOf("jb")+2, currFileName.indexOf(".sav"))).toInt();
+        fileNames[fileNum-1] = file.name();
+     }
+     file = root.openNextFile();
+     //fileNum++;
   }
 }
 
-
-
-
-    /**
-    File file = SPIFFS.open("/test.txt", "r");
-  if (!file) 
-  {
-    Serial.println("Failed to open file for reading");
-    return;
-  }
-  //vector<String> v;
-  while (file.available()) 
-  {
-    //Serial.println(file.readStringUntil('t'));
-    Serial.println(file.readString());
-  }
-  file.close();
-    
-}
-*/
-
-void LittleFSManager::writeTextFile()
+void LittleFSManager::deleteFile(String & filenameIn)
 {
-	 File file = LittleFS.open("/testing.txt", FILE_WRITE);
- 
+    String filename = String("/") + filenameIn;
+    LittleFS.remove(filename); 
+}
+
+void LittleFSManager::writeTextFile(String & filenameIn, String & text2Write)  //writeTextFile
+{
+  String filename = String("/") + filenameIn;
+	File file = LittleFS.open(filename, FILE_WRITE);
   if (!file) 
    {
-     Serial.println("There was an error opening the file for writing");
+     //Serial.println("Error opening file for writing");
      return;
    }
-  if (file.print("now is the time for all good men to come to the aid of the party")) {
-    Serial.println("File was written");
-  } 
+  if (file.print(text2Write)) {} //Serial.println("File was written");} 
   else 
   {
-    Serial.println("File write failed");
+     // Serial.println("File write failed");
   }
   file.close();
 }
