@@ -1,16 +1,17 @@
-//07Dec2025
-
-JB_JoystickReader joystickReader; //this order currentVals still isn't seeing joystickreader
+//19Dec2025
+JBSAV_JoystickReader joystickReaderJBSAV;
+JB_JoystickReader joystickReaderJB; //this order currentVals still isn't seeing joystickreader
 CurrentValuesJB valuesJB;
 JB_Calc 	 			jb_calc;
 JB_LcdHdlr 			jb_lcdHandler;
 JB_SaveLcdH     jb_SaveScreenHndlr;
-uint8_t rowSelected, oldRow=0;
+uint8_t rowSelectedJB, oldRowJB=0;
+uint8_t rowSelectedJBSAV=0;
 
 /** called once at startup*/
 void JB_Main::initJB() 
 {
-	joystickReader.setup();
+	joystickReaderJB.setup(); 
 	jb_lcdHandler	.setup(true);
   jb_calc				.setup();
   valuesJB			.setup();
@@ -21,33 +22,41 @@ void JB_Main::startJB()
 {
 	jb_lcdHandler.setupScreen();
 	jb_calc.calculate(valuesJB, false);
-  jb_lcdHandler.updateScreen(valuesJB);
-	delay(1000);
-	jb_SaveScreenHndlr.setupScreen();
-	delay(100000);
+  jb_lcdHandler.updateScreen(valuesJB, false);
+}
+
+void JB_Main::loop()
+{
+	    jsPushSwitchReader.checkForSwitchPush();
+      if (jb_lcdHandler.screenShowing==JB)    {loopJB()   ;}
+ else if (jb_lcdHandler.screenShowing==JBSAV) {loopJBSav();}
+}
+
+void JB_Main::loopJBSav()
+{
+	delay(50);
+	joystickReaderJBSAV.getSelectedRow(); //0-back, 1-M1, 2-M2, 3-M3, 4-M4, 5-M5
+	//Serial.println("JBMain::loopJBSav called");
 }
 
 void JB_Main::loopJB()
 {
-	joystickReader.getSelectedRow(rowSelected); //0 - dJuice Reqd >  1 - dRatio g/ml > 2 - PG/VG 3 - DMT
-	if(rowSelected!=oldRow)
+	joystickReaderJB.getSelectedRow(); //0 - dJuice Reqd >  1 - dRatio g/ml > 2 - PG/VG 3 - DMT
+	if(rowSelectedJB!=oldRowJB)
    { 
-  	  jb_lcdHandler.setSelectedField(rowSelected);   
-	    oldRow = rowSelected; 
+  	  jb_lcdHandler.setSelectedField(rowSelectedJB);   
+	    oldRowJB = rowSelectedJB; 
    }
  
- if(joystickReader.isCentredYRaw() && !joystickReader.isCentredXRaw() )
+ if(joystickReaderJB.isCentredYRaw() && !joystickReaderJB.isCentredXRaw())
  {
-		 valuesJB.incrementValue(joystickReader.getJoystickXMappedVal(), rowSelected);
-	   if(rowSelected==3){jb_calc.calculateForDeemsWeight(valuesJB);}
+		 valuesJB.incrementValue(joystickReaderJB.getJoystickXMappedVal(), rowSelectedJB);
+	   if(rowSelectedJB==3){jb_calc.calculateForDeemsWeight(valuesJB);}
 	   else {jb_calc.calculate(valuesJB, false);}
-	   jb_lcdHandler.updateScreen			(valuesJB);   
+	   jb_lcdHandler.updateScreen			(valuesJB, false);   
  }
-  jb_lcdHandler.setJoystickMeter(joystickReader.joystickXRaw, valuesJB); 
+  jb_lcdHandler.setJoystickMeter(joystickReaderJB.getJoystickXRaw(), valuesJB); 
 
-	//boolean hi = digitalRead(JOYSTICK_PUSHSW_PIN);
-  //Serial.println(String(hi));
-  
  delay (0);
  }
 
@@ -58,26 +67,17 @@ for (int16_t f=30; f>-1; f-=1)
 	{
 			valuesJB.pgRatio=f;
 		 	jb_calc.calculate(valuesJB, false);
-     	jb_lcdHandler.updateScreen(valuesJB);
+     	jb_lcdHandler.updateScreen(valuesJB, false);
      	delay (200);
 	}
 
-/**
-////dratio test
-for (float f=0; f<21; f+=0.5)
-	{
-			valuesJB.deemsRatio=f;
-		 	jb_calc.calculate(valuesJB, false);
-     	jb_lcdHandler.updateScreen(valuesJB);
-     	delay (100);
-	}
-*/
+
 	//djuice req'd test
 	for (float f=0; f<90; f+=0.9)
 	{
 			valuesJB.setTojMl(f);
 		 	jb_calc.calculate(valuesJB, false);
-     	jb_lcdHandler.updateScreen(valuesJB);
+     	jb_lcdHandler.updateScreen(valuesJB, false);
      	delay (200);
 	}
 	
