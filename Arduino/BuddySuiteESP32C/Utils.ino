@@ -1,4 +1,4 @@
-//07Dec2025
+//19Dec2025
 /**
  * Connections
  * ESP32C3  ST7789 Display (currently 320x240)
@@ -11,9 +11,9 @@
  * 3.3V				VCC	red
  * GND				GND	gray
  */
-#include "SPIFFS.h" 
-#include <SPIFFS_ImageReader.h> //https://forum.arduino.cc/t/st7789-draw-bmp-files-faster/685758/5
-#include <FS.h>
+// #include "SPIFFS.h" 
+// #include <SPIFFS_ImageReader.h> //https://forum.arduino.cc/t/st7789-draw-bmp-files-faster/685758/5
+// #include <FS.h>
  void Utils::rightJustifyPad(String & mlStr, int16_t reqLen)
 {
   String spaces(""); String sp(" ");
@@ -40,9 +40,36 @@ uint32_t Utils::color24to16(uint32_t color888)
   return (r | g | b);
 }
 
- void readFile(int file)
+ String Utils::makeDRatString (const CurrentValuesJB & valuesJB)
  {
- 	    int a=0;
+     return makeDratString(valuesJB.deemsRatio);
+     
+    //uint8_t dRatX10 = valuesJB.deemsRatio * 10;
+		// uint8_t prefix=1;
+    // if(dRatX10<10)
+    //  	{
+    //    	prefix=2;
+    //    	dRatX10 = dRatX10 *2;
+    //  	} 
+		//  	uint8_t 	digit1 = (dRatX10/10);
+    //  	uint8_t 	digit2 = dRatX10 - (digit1*10);
+    //  	String 		outStr = String(prefix) + String(":")+ String(digit1) + String(".") + String(digit2);	
+    //return outStr;
+ }
+
+ String Utils::makeDratString(const float drat)
+ {
+    uint8_t dRatX10 = drat * 10;
+		uint8_t prefix=1;
+    if(dRatX10<10)
+     	{
+       	prefix=2;
+       	dRatX10 = dRatX10 *2;
+     	} 
+		 	uint8_t 	digit1 = (dRatX10/10);
+     	uint8_t 	digit2 = dRatX10 - (digit1*10);
+     	String 		outStr = String(prefix) + String(":")+ String(digit1) + String(".") + String(digit2);	
+      return outStr;
  }
 
 /**
@@ -79,49 +106,39 @@ uint32_t Utils::color24to16(uint32_t color888)
 
 //https://github.com/ThingPulse/minigrafx/blob/master/src/MiniGrafx.cpp#L654
 
-File filey;
- void testspiffs()
- {
-	 if(!SPIFFS.begin(true)){
-        Serial.println("An Error has occurred while mounting SPIFFS");
-        return;}
- 	
- 	filey = SPIFFS.open("/DRV320x240.bmp"); 
- 	if (!filey) {Serial.println("file open failed");}
- 	delay(5000);
-
- 	
- //	while (filey.available()) 
- for(int byteOffset = 0; byteOffset<21; byteOffset++)
- 	{
- 		uint8_t one_byte = filey.read();
- 		//uint16_t two_bytes = read16FromFiley ();
- 		Serial.println(String("byte ") + String (byteOffset)  + String(" = ") + String(one_byte, HEX));
- 		delay(1000);
- 	}	
- }
-
-uint16_t read16FromFiley () {
-	  uint16_t result;
-  ((uint8_t *)&result)[0] = filey.read(); // LSB
-  ((uint8_t *)&result)[1] = filey.read(); // MSB
-   return result;
+/** "3.5 3.00 70" */
+void splitToFloats(const String & StringIn, float array[], uint8_t arraySize)
+{
+  String chopStr = StringIn;
+  int StringCount=0;
+    while (StringIn.length() > 0)
+    {
+        int index = chopStr.indexOf(' ');
+        if (index == -1) // No space found
+        { break; }
+        else       //space found
+        {
+          String currStr= chopStr.substring(0, index);
+          array[StringCount++] = currStr.substring(0, index).toFloat();
+          chopStr = chopStr.substring(index+1);
+        }
+    }
+    array[StringCount]= chopStr.toFloat();
 }
- 
 
-//  uint16_t read16 (fs::File &f) {
-//  uint16_t result;
-//  ((uint8_t *)&result)[0] = f.read(); // LSB
-//  ((uint8_t *)&result)[1] = f.read(); // MSB
-//   return result;
-//}
-
-//uint32_t read32(File &f) 
-//{
-//  uint32_t result;
-//  ((uint8_t *)&result)[0] = f.read(); // LSB
-//  ((uint8_t *)&result)[1] = f.read();
-//  ((uint8_t *)&result)[2] = f.read();
-//  ((uint8_t *)&result)[3] = f.read(); // MSB
-//  return result;
-//}
+   /** while (str.length() > 0)
+  {
+    int index = str.indexOf(' ');
+    if (index == -1) // No space found
+    {
+      strs[StringCount++] = str;
+      break;
+    }
+    else
+    {
+      strs[StringCount++] = str.substring(0, index);
+      str = str.substring(index+1);
+    }
+  }
+  */
+  
