@@ -1,19 +1,20 @@
-//07Dec2025
+//19Dec2025
   // SPI speed defaults to SPI_DEFAULT_FREQ defined in the library, you can override it here
   // Allowable spped depends on chip & wiring Too fast may get you a black screen some times, continuous.
   //tft.setSPISpeed(40000000);
 
 void JB_LcdHdlr::setupScreen()
 		{		
-				//tft.setFont(&Open_Sans_Italic_23); 	// https://oleddisplay.squix.ch/
+				tft.setFont (&Open_Sans_Italic_23);
+			 	// https://oleddisplay.squix.ch/
 				//tft.setRotation(1);
 				tft.fillScreen(colorTextBG_darkBlue);
 				//////////////////////////////////////////////////////////////////////////////////
-				tft.drawRoundRect(0, 0, 	tft.width(), tft.height()-135, 10, colorText1);  //border line top
+				tft.drawRoundRect(0, 0, 	tft.width(), tft.height()-135, 10, ST77XX_YELLOW);  //border line top
 				tft.drawRoundRect(0, 108, tft.width(), tft.height()-110, 10, colorText2);//border line botton
 		  	//////////////////////////////////////////////////////////////////////////////////
 				uint8_t yOffset = 30; // uint8_t lineSpacing=30;uint8_t xMarginLeftPixels = 12;
-				tft.setTextColor(colorText1, colorTextBG_darkBlue);
+				tft.setTextColor(ST77XX_YELLOW, colorTextBG_darkBlue);
 				tft.setCursor(xMarginLeftPixels, yOffset); tft.print("dJuice Req'd");  
 				
 				uint16_t strLenPixels = getStringWidthPixels(&Open_Sans_Italic_23, mlStr);
@@ -42,10 +43,13 @@ void JB_LcdHdlr::setupScreen()
 
   			quasi_StrLenPixels = getStringWidthPixels(&Open_Sans_Italic_23, quasi_Str); //housekeeping for the solubility display update
   			setSelectedField(0);
+				screenShowing=JB;  //JB, JBSAV
 		}
 
-void JB_LcdHdlr::updateScreen(CurrentValuesJB & values)  
+void JB_LcdHdlr::updateScreen(CurrentValuesJB & values, boolean updateAllin)  
 {
+	//tft.setFont (&Open_Sans_Italic_23);
+	updateAll = updateAllin;
 	tft.setTextColor			 (colorText1, colorTextBG_darkBlue);
 	setDjuiceRequiredField (values);
 	setDRatField 					 (values);
@@ -73,7 +77,7 @@ void JB_LcdHdlr::setSelectedField(uint8_t sel) //0-dJuice Reqd, 1-dRatio g/ml, 2
 
 void JB_LcdHdlr::setDjuiceRequiredField(CurrentValuesJB & values)
 	{
-			if (oldTojMl == values.getTojMl()) {return;}   //return if this field isn't being changed, saves display flicker
+			if (!updateAll && oldTojMl == values.getTojMl()) {return;}   //return if this field isn't being changed, saves display flicker
 			uint8_t yOffset = 30;  
 			float needed 		= values.getTojMl();
 			oldTojMl 				= needed;
@@ -89,19 +93,11 @@ void JB_LcdHdlr::setDjuiceRequiredField(CurrentValuesJB & values)
 		
 void JB_LcdHdlr::setDRatField(CurrentValuesJB & values)
 		{
-			if(oldDeemsRatio==values.deemsRatio){return;}
+			if(!updateAll && oldDeemsRatio==values.deemsRatio){return;}
 			oldDeemsRatio 	= values.deemsRatio;
 			uint8_t yOffset = 60;  uint8_t xOffset=245;
-			uint8_t dRatX10 = values.deemsRatio * 10;
-			uint8_t prefix=1;
-     	if(dRatX10<10)
-     	{
-       	prefix=2;
-       	dRatX10 = dRatX10 *2;
-     	} 
-		 	uint8_t 	digit1 = (dRatX10/10);
-     	uint8_t 	digit2 = dRatX10 - (digit1*10);
-     	String 		outStr = String(prefix) + String(":")+ String(digit1) + String(".") + String(digit2);	
+			String outStr = utils.makeDRatString(values);
+	
 			uint16_t 	outStrLenPixels = getStringWidthPixels(&Open_Sans_Italic_23, outStr);
      	uint8_t 	rectXlen = 70;
      	tft.fillRect (tft.width() - xMarginRightPixels - rectXlen, yOffset-20, rectXlen, 24, colorTextBG_darkBlue ); // ST77XX_BLACK colorTextBG_darkBlue
@@ -111,7 +107,7 @@ void JB_LcdHdlr::setDRatField(CurrentValuesJB & values)
 		
 		void JB_LcdHdlr::setPgRatField(CurrentValuesJB & values)
 		{
-			if(oldPgRatio==values.pgRatio){return;} //return if this display isn't being changed.  Saves flicker.
+			if(!updateAll && oldPgRatio==values.pgRatio){return;} //return if this display isn't being changed.  Saves flicker.
 			oldPgRatio=values.pgRatio;
 			uint8_t yOffset = 90;  
 			uint8_t pgPerc 	= values.pgRatio;
@@ -126,8 +122,8 @@ void JB_LcdHdlr::setDRatField(CurrentValuesJB & values)
 		
 		void JB_LcdHdlr::setPgMlOrVgMlField(CurrentValuesJB & values, boolean PG)
 		{
-			if ( PG && ((roundf(oldPgMl*100)/100.0)==roundf(values.pgMl*100)/100.0)) 				{return;}
-			else  if (!PG && ((roundf(oldVgMl*100)/100.0)==roundf(values.vgMl*100)/100.0))  {return;}
+			if ( !updateAll && PG && ((roundf(oldPgMl*100)/100.0)==roundf(values.pgMl*100)/100.0)) 				{return;}
+			else  if (!PG && !updateAll && ((roundf(oldVgMl*100)/100.0)==roundf(values.vgMl*100)/100.0))  {return;}
 
 			uint8_t yOffset = 135; 
 			if(PG) 	{oldPgMl=values.pgMl;}
@@ -153,7 +149,7 @@ void JB_LcdHdlr::setDRatField(CurrentValuesJB & values)
 		
 		void JB_LcdHdlr::setDeemsMgField(const CurrentValuesJB & values)
 		{
-			if(oldDeemsMg==values.deemsMg){return;}  //return if this display isn't being changed.  Saves flicker.
+			if(!updateAll && oldDeemsMg==values.deemsMg){return;}  //return if this display isn't being changed.  Saves flicker.
 			oldDeemsMg = values.deemsMg;
 			uint8_t 	yOffset = 195;
 			uint16_t  deemsMg = values.deemsMg;
@@ -166,7 +162,7 @@ void JB_LcdHdlr::setDRatField(CurrentValuesJB & values)
 
 		void JB_LcdHdlr::setSolubilityField(const CurrentValuesJB & values)
 		{
-			if (oldSolubility==values.solubility) {return;}
+			if (!updateAll && oldSolubility==values.solubility) {return;}
 			oldSolubility=values.solubility;
 			
 			uint8_t yOffset = 225; uint8_t xOffset = 235;//xoffset is for the "oluble" printed at setupscreen()
@@ -180,18 +176,20 @@ void JB_LcdHdlr::setDRatField(CurrentValuesJB & values)
     		default:            																																																		break;
   		}	
    		uint16_t  strLenPixels = getStringWidthPixels(&Open_Sans_Italic_23,solStr);
-   		uint8_t 	xrectXlen 	 = 40;//35
+   		uint8_t 	xrectXlen = 60;//35
+
   		tft.fillRect (tft.width() - xMarginRightPixels - olubleStrLenPixels - xrectXlen,    yOffset-20,  xrectXlen, 24, colorTextBG_darkBlue); //ST77XX_RED colorTextBG_darkBlue
   		tft.setCursor(tft.width()	- xMarginRightPixels - olubleStrLenPixels - strLenPixels, yOffset); 	tft.print(solStr); 
 	  	xrectXlen =   quasi_StrLenPixels+5;
   		tft.fillRect (tft.width() - xMarginRightPixels - xrectXlen, yOffset-27-20,  xrectXlen, 24, colorTextBG_darkBlue); //ST77XX_RED colorTextBG_darkBlue
-  		if(values.solubility==SOLUBLE) {tft.drawRGBBitmap(200,205, thumbsup_23x24, 23,24);}
+  		if(values.solubility==SOLUBLE)      {tft.drawRGBBitmap(200,205, thumbsup_23x24,   23,24);}
+			if(values.solubility==NOT_SOLUBLE)  {tft.drawRGBBitmap(182,206, thumbsdown_23x24, 23,24);}
   		tft.setCursor(tft.width() - xMarginRightPixels - quasi_StrLenPixels, yOffset-27); 					  tft.print(upperLineString); 
  	}
  		
 void JB_LcdHdlr::setTotalJuiceGramsField(const CurrentValuesJB & values)
 {	
-	if  ((roundf(oldTotalWeightOfDJuice_g*10)/10.0)==(roundf(values.totalWeightOfDJuice_g*10)/10.0)) 	{return;}
+	if  (!updateAll && (roundf(oldTotalWeightOfDJuice_g*10)/10.0)==(roundf(values.totalWeightOfDJuice_g*10)/10.0)) 	{return;}
 	oldTotalWeightOfDJuice_g = values.totalWeightOfDJuice_g;
 	uint8_t yOffset = 225; 
 	float totalWeightOfDJuice_g = values.totalWeightOfDJuice_g;
@@ -200,4 +198,9 @@ void JB_LcdHdlr::setTotalJuiceGramsField(const CurrentValuesJB & values)
 	uint8_t   rectXlen     = 60;
 	tft.fillRect (xOffsetMg - rectXlen-textToUnitGapPixels,	yOffset-21, rectXlen, 24, colorTextBG_darkBlue); //ST77XX_RED
   tft.setCursor(xOffsetMg-strLenPixels-textToUnitGapPixels, yOffset); 				tft.print(out);
-}		
+}
+
+// void JB_LcdHdlr::openSaveScreen()
+// {
+// 		jb_SaveScreenHndlr.setupScreen();
+// }
