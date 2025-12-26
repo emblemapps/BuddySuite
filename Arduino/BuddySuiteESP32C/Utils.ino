@@ -1,4 +1,4 @@
-//19Dec2025
+//26Dec2025
 /**
  * Connections
  * ESP32C3  ST7789 Display (currently 320x240)
@@ -43,18 +43,6 @@ uint32_t Utils::color24to16(uint32_t color888)
  String Utils::makeDRatString (const CurrentValuesJB & valuesJB)
  {
      return makeDratString(valuesJB.deemsRatio);
-     
-    //uint8_t dRatX10 = valuesJB.deemsRatio * 10;
-		// uint8_t prefix=1;
-    // if(dRatX10<10)
-    //  	{
-    //    	prefix=2;
-    //    	dRatX10 = dRatX10 *2;
-    //  	} 
-		//  	uint8_t 	digit1 = (dRatX10/10);
-    //  	uint8_t 	digit2 = dRatX10 - (digit1*10);
-    //  	String 		outStr = String(prefix) + String(":")+ String(digit1) + String(".") + String(digit2);	
-    //return outStr;
  }
 
  String Utils::makeDratString(const float drat)
@@ -125,20 +113,3 @@ void splitToFloats(const String & StringIn, float array[], uint8_t arraySize)
     }
     array[StringCount]= chopStr.toFloat();
 }
-
-   /** while (str.length() > 0)
-  {
-    int index = str.indexOf(' ');
-    if (index == -1) // No space found
-    {
-      strs[StringCount++] = str;
-      break;
-    }
-    else
-    {
-      strs[StringCount++] = str.substring(0, index);
-      str = str.substring(index+1);
-    }
-  }
-  */
-  
