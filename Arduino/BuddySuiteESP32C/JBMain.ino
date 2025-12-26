@@ -1,4 +1,4 @@
-//19Dec2025
+//26Dec2025
 JBSAV_JoystickReader joystickReaderJBSAV;
 JB_JoystickReader joystickReaderJB; //this order currentVals still isn't seeing joystickreader
 CurrentValuesJB valuesJB;
@@ -17,7 +17,7 @@ void JB_Main::initJB()
   valuesJB			.setup();
 	jb_SaveScreenHndlr.setup(false); //showsplash
 }
-
+// timeJbSAV_Started=millis();  when 
 void JB_Main::startJB()
 {
 	jb_lcdHandler.setupScreen();
@@ -27,9 +27,24 @@ void JB_Main::startJB()
 
 void JB_Main::loop()
 {
+			ScreenShowing oldScreenShowing = jb_lcdHandler.screenShowing;
 	    jsPushSwitchReader.checkForSwitchPush();
+			if (oldScreenShowing==JB  && jb_lcdHandler.screenShowing==JBSAV) 
+ 			{
+					// Serial.println("just opened save screen");
+					timeJbSAV_Started=millis(); //this works
+		  }
+
       if (jb_lcdHandler.screenShowing==JB)    {loopJB()   ;}
- else if (jb_lcdHandler.screenShowing==JBSAV) {loopJBSav();}
+ else if (jb_lcdHandler.screenShowing==JBSAV) 
+ {
+	 unsigned long durationJBSavScreen =   millis() -  timeJbSAV_Started;
+	 if(jsPushSwitchReader.wasPressedRecently()  || joystickReaderJBSAV.wasMovedRecently()) {timeJbSAV_Started=millis();}
+
+	 //Serial.println(String("save screen has been on for ") + String(durationJBSavScreen) + String("ms"));
+	 if(durationJBSavScreen>jb_SaveScreenHndlr.idleScreenTimeout_ms) {jsPushSwitchReader.returnToJuiceBuddyScreen();} 
+	 loopJBSav();
+ }
 }
 
 void JB_Main::loopJBSav()
@@ -37,6 +52,7 @@ void JB_Main::loopJBSav()
 	delay(50);
 	joystickReaderJBSAV.getSelectedRow(); //0-back, 1-M1, 2-M2, 3-M3, 4-M4, 5-M5
 	//Serial.println("JBMain::loopJBSav called");
+	jb_SaveScreenHndlr.printStatusMessage();
 }
 
 void JB_Main::loopJB()
