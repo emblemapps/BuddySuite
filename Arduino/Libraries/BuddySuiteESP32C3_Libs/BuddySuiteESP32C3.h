@@ -1,4 +1,4 @@
-//19Dec2025
+//26Dec2025
 #ifndef HEADER_JoystickReader
 #define HEADER_JoystickReader
 #define JOYSTICK_X_PIN 2     
@@ -82,8 +82,10 @@ class JBSAV_JoystickReader : public JoystickReader
 	public: 
 			void getSelectedRow();
 			void readAndConvertJoystickX(const int & incRawX);	
+			boolean wasMovedRecently();
 	private:
-			unsigned long  millisSinceRowLastChanged = 0;	
+			boolean movedRecently;
+			unsigned long millisSinceRowLastChanged = 0;	
 };
 #endif
 
@@ -95,8 +97,11 @@ class JoystickPushSwitchReader : public JoystickReader
 	public:
 			void setup();
 			void checkForSwitchPush();
+			void returnToJuiceBuddyScreen();
+			boolean wasPressedRecently();
 	private: 
 			void sendPushSwitchNotification();
+			boolean pressedRecently;
 };
 
 #endif
@@ -153,6 +158,7 @@ class JB_Main
 			void loopJBSav();
 			void test();
 	private:
+			unsigned long timeJbSAV_Started; //for the return to JB timeout
 };
 #endif
 
@@ -181,8 +187,7 @@ class LcdHdlr
 		void setup(boolean showSplash);          			//2.0" 320x240 ST7789 TFT}
 		void drawBitMap(Adafruit_ST7789 tft);
 		void showStartupSplash();
-		void setJoystickMeter(const int & rawXPos, const CurrentValuesJB & values);  //0-4096	
-				
+		void setJoystickMeter(const int & rawXPos, const CurrentValuesJB & values);  //0-4096			
 	protected:
 		const uint16_t colorTextBG_darkBlue	  = 0x0004; // 5.6.5 RGB
 		const uint16_t colorCursor   	 	  = 0x29F; //ST77XX_BLUE;
@@ -214,7 +219,6 @@ class JB_LcdHdlr:public LcdHdlr
 		boolean updateAll = false;
 		const uint8_t xOffsetMg 		  = 148;
 		const uint8_t xOffsetMl           = 150;
-		
 		const uint8_t textToUnitGapPixels = 3 ; //eg 1.3<gap>ml
 		uint16_t 	  olubleStrLenPixels  = 0 ; //set in setupScreen()
 	    uint16_t 	  quasi_StrLenPixels  = 0 ; //set in setupScreen()
@@ -258,19 +262,21 @@ class Utils
 class JB_SaveLcdH: public LcdHdlr
 {
 	public:
-		//void setup();
+		const uint16_t idleScreenTimeout_ms = 30000;
 		void setupScreen(CurrentValuesJB & valuesJB);
-		void loopJbSav();
 		void setSelectedRow(int selectedRow);
 		void joystickMoveX(boolean toRight);
+		void setStatusMessage(String & message);
 		void doClick();
+		String currentSettingsString=""; 
+		void printStatusMessage();
 	private:
-			unsigned long timeStarted;
+			String statusMessage="";
 			unsigned long maxIdleDuration =  10 * 1000; //60 secs for now
 			void displaySaveLocationsFramework();
 			void populateSaveLocationsArray();
-			void displaySaveLocationsStrings();
-			void printCurrentSettingsString(CurrentValuesJB & valuesJB);
+			void displaySaveLocationsStrings(boolean animate);
+			void printCurrentSettingsString(CurrentValuesJB & valuesJB, boolean flashText);		
 };
 #endif
 
@@ -295,16 +301,17 @@ class LittleFSManager
 #ifndef HEADER_SaveLocation
 #define HEADER_SaveLocation
 //#include <SPIFFS_ImageReader.h> //https://forum.arduino.cc/t/st7789-draw-bmp-files-faster/685758/5
-
+enum SelectState {SELECTED, UNSELECTED};
 class SaveLocation
 {
 	public: 
+			SelectState selectState= UNSELECTED;
 			SaveLocation(String filenameIn, int yPosIn);
 			void loadFile();  // sets the three calc variables of the current valuesJb
 			void saveFile();
 			void deleteFile();
 			void setValues(float (& valsArray) []);
-			void printDisplayString();
+			void printDisplayString(boolean animate);
 			//void refreshButtonString();
 			void printButtonString();
 			void printButtonString(uint16_t color);
@@ -321,15 +328,21 @@ class SaveLocation
 			float  tojMl=0;
 			float  deemsRatio = 0;
 			int16_t pgRatio=0;
+			String oldDisplayString ="";
+			boolean selected=false;
+			boolean oldSelected =false;
 	protected:
 	private:
 				String buttonStrDisplayed="save";
 				String displayString ="";
+				String oldButtonString = "";
+				uint16_t oldButtonTextColor = 0;
 				void makeDisplayString();
 				void setCursorForButtonString();
 				void animateButtonProgressBar();
 				int yPos;
-				int xPos=49;	
+				int xPos=49;
+				
 };
 SaveLocation saveLocations [] = {SaveLocation("jb1.sav", 110), SaveLocation("jb2.sav",140), SaveLocation("jb3.sav", 170), SaveLocation("jb4.sav", 200), SaveLocation("jb5.sav", 230)};
 #endif
