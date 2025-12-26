@@ -1,4 +1,4 @@
-//19Dec2025
+//26Dec2025
 void JBSAV_JoystickReader::getSelectedRow()
 {
 	boolean yMoved=false; boolean xMoved=false;
@@ -6,11 +6,13 @@ void JBSAV_JoystickReader::getSelectedRow()
   // Serial.print("here");
 	if(isCentredXRaw(oldJoystickXRaw) && !(isCentredXRaw(joystickXRaw))) {xMoved=true;} //has moved in X
 	if(isCentredYRaw(oldJoystickYRaw) && !(isCentredYRaw(joystickYRaw))) {yMoved=true;} //has moved in Y
-
+   
 	oldJoystickXRaw = joystickXRaw;
 	oldJoystickYRaw = joystickYRaw;
 
 	if (!(yMoved || xMoved ))  {return;} 
+
+	movedRecently=true;
 
 	if (xMoved && yMoved) //both moved, let's take whichever moved the most from centre
 	{
@@ -36,28 +38,13 @@ else {
 			}
    jb_SaveScreenHndlr.setSelectedRow(rowSelectedJBSAV);
 	}
-
-	
-     
-
-	
-	//Serial.println(String("JBSAV_JSREADER: xRaw=") + String(joystickXRaw) + String(", yRaw=") + String(joystickYRaw));
-	/*readAndConvertJoystickX	 (joystickXRaw)  ;  //Converts raw X joystick input values ~0-4095 to ~ -10 to +10 in joystickXMapped, also populates joystickForce enum
- 
- if (isCentredYRaw(oldJoystickYRaw) && !isCentredYRaw(joystickYRaw)) //has the joystick moved from Y centre?
- {
- 	   if (millisSinceRowLastChanged > millis() - 350)  {return;} 
- 	   millisSinceRowLastChanged = millis();
-     if(joystickCentreYRaw > joystickYRaw){rowSelectedJB--;}
-     else {rowSelectedJB++;}
-   
-    rowSelectedJB = rowSelectedJB%4;
-    //Serial.println (String("y=") + String(joystickY) + String(", row=") + String(rowSelected) + String(", isCentred?") + (joystick.isCentred(joystickY))); 
- }
- oldJoystickYRaw=joystickYRaw;
-	*/
 }
-
-	
-      
+     	 
+boolean JBSAV_JoystickReader::wasMovedRecently()
+		 {
+			  boolean ret  = movedRecently;
+  			movedRecently=false;   //done like this so we don't need to reset it
+  			return ret;
+		 }
+		      
 void JBSAV_JoystickReader::readAndConvertJoystickX(const int & incRawX) {}
