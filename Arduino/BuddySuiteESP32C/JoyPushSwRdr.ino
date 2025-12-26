@@ -1,4 +1,4 @@
-//19Dec2025
+//26Dec2025
 boolean OldJoyPushSwitchStatus           = 1;
 void JoystickPushSwitchReader::setup()
 {
@@ -26,16 +26,31 @@ void JoystickPushSwitchReader::sendPushSwitchNotification()
   {
     if(rowSelectedJBSAV==0)
     {
-      jb_lcdHandler.setupScreen();
-      jb_lcdHandler.setSelectedField(rowSelectedJB);
-      jb_calc.calculate             (valuesJB, false);
-      jb_lcdHandler.updateScreen    (valuesJB, true);  
+      returnToJuiceBuddyScreen();
     } 
     else
     {
       jb_SaveScreenHndlr.doClick();
       rowSelectedJBSAV=0;
       jb_SaveScreenHndlr.setSelectedRow(0);
+      //jb_SaveScreenHndlr.printStatusMessage();
+      pressedRecently=true;
     }
+    
   }
+}
+
+boolean JoystickPushSwitchReader::wasPressedRecently()
+{
+  boolean ret  = pressedRecently;
+  pressedRecently=false;   //done like this so we don't need to reset it
+  return ret;
+}
+
+void JoystickPushSwitchReader::returnToJuiceBuddyScreen()
+{
+    jb_lcdHandler.setupScreen();
+    jb_lcdHandler.setSelectedField(rowSelectedJB);
+    jb_calc.calculate             (valuesJB, false);
+    jb_lcdHandler.updateScreen    (valuesJB, true);  
 }
