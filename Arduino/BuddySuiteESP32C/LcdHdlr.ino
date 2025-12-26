@@ -1,4 +1,4 @@
-//19Dec2025
+//26Dec2025
 void LcdHdlr::setup(boolean showSplash)
 {
 	tft.init(240, 320);
@@ -11,7 +11,8 @@ void LcdHdlr::showStartupSplash()
 {
 		drawBitMap(tft);//2 secdelay built in		
 }
-#include <./Pics/splash1.h>
+//#include <./Pics/splash1.h>
+#include <./Pics/splash2.h>
 #include <./Pics/picSave_26x26.h>
 #include <./Pics/thumbsup_23x24.h>
 #include <./Pics/thumbsdown_23x24.h>
@@ -20,8 +21,10 @@ void LcdHdlr::drawBitMap(Adafruit_ST7789 tft)
 	{
 				tft.fillScreen(ST77XX_BLACK);
 				tft.setRotation(1);
-				tft.drawRGBBitmap(0, 0, splash1, 320,240);
-				delay (2000);
+//				tft.drawRGBBitmap(0, 0, splash1, 320,240);
+//				delay (6000);
+				tft.drawRGBBitmap(0, 0, splash2, 320,240);
+				delay (1500);
 				tft.fillScreen(ST77XX_BLACK);
 				/**Many more drawbitmap functs in Adafruit_gfx.h
 				void drawRGBBitmap(int16_t x, int16_t y, const uint16_t bitmap[], int16_t w, int16_t h);
