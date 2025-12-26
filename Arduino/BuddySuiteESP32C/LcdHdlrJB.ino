@@ -1,4 +1,4 @@
-//19Dec2025
+//26Dec2025
   // SPI speed defaults to SPI_DEFAULT_FREQ defined in the library, you can override it here
   // Allowable spped depends on chip & wiring Too fast may get you a black screen some times, continuous.
   //tft.setSPISpeed(40000000);
