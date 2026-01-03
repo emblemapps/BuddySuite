@@ -1,4 +1,4 @@
-//26Dec2025
+//03Jan2026
 boolean OldJoyPushSwitchStatus           = 1;
 void JoystickPushSwitchReader::setup()
 {
@@ -33,7 +33,6 @@ void JoystickPushSwitchReader::sendPushSwitchNotification()
       jb_SaveScreenHndlr.doClick();
       rowSelectedJBSAV=0;
       jb_SaveScreenHndlr.setSelectedRow(0);
-      //jb_SaveScreenHndlr.printStatusMessage();
       pressedRecently=true;
     }
     
