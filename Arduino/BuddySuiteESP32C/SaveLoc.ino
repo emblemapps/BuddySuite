@@ -1,4 +1,4 @@
-//26Dec2025
+//03Jan2026
 /**
    float tojMl=0;
 	int16_t pgRatio=0;
@@ -6,15 +6,13 @@
 */
 
 /*Constructor filenames will be const at jb1.sav to jb5.sav*/
-SaveLocation::SaveLocation(String filenameIn, int yPosIn)
+SaveLocationJB::SaveLocationJB(String filenameIn, int yPosIn)
 {
-   filename = filenameIn;
+   filename = filenameIn; //jb1.sav -> jb5.sav
    yPos = yPosIn;
 }
 
-String ButtonStrings[] = {"save", "load", "clear"};
-
-void SaveLocation::joystickMoveX(boolean right)
+void SaveLocationJB::joystickMoveX(boolean right)
 {
       oldSelected = selected;
       if (right) 
@@ -30,22 +28,22 @@ void SaveLocation::joystickMoveX(boolean right)
       printButtonString(ST77XX_YELLOW);
 }
 
-void SaveLocation::saveFile()
+void SaveLocationJB::saveFile()
 {
      String saveString =  String (valuesJB.getTojMl())  + String(" ") + String(valuesJB.deemsRatio) + String(" ") + String(valuesJB.pgRatio);
      //String saveString =  "3.5 5.00 65";
      if (displayString.equals(valuesJB.toString()))
      {
          String msgStr=String("Settings already stored in M") + String (filename.substring(2,3));
-         jb_SaveScreenHndlr.setStatusMessage(msgStr);
+         jb_SaveScreenHndlr.setStatusMessage(msgStr, &Roboto_Condensed_Italic_17);
          return;
      }
      littleFS.writeTextFile(filename, saveString);
      String msgStr=String("Settings saved in M") + String (filename.substring(2,3));
-     jb_SaveScreenHndlr.setStatusMessage(msgStr);
+     jb_SaveScreenHndlr.setStatusMessage(msgStr, &Roboto_Condensed_Italic_17);
 }
 
-void SaveLocation::setValues(float (& valsArray) [])
+void SaveLocationJB::setValues(float (& valsArray) [])
 {  
    isEmpty=false;
    tojMl       =  valsArray[0];
@@ -54,7 +52,7 @@ void SaveLocation::setValues(float (& valsArray) [])
    makeDisplayString();
 }
 
-void SaveLocation::select()
+void SaveLocationJB::select()
 {  
    oldSelected = selected;
    selected = true;
@@ -62,7 +60,7 @@ void SaveLocation::select()
    printButtonString(ST77XX_YELLOW);
 }
 
-void SaveLocation::unSelect()
+void SaveLocationJB::unSelect()
 {
    oldSelected = selected;
    selected = false;    
@@ -70,7 +68,7 @@ void SaveLocation::unSelect()
    printButtonString();
 }
 
-void SaveLocation::printButtonString(uint16_t fgColor)
+void SaveLocationJB::printButtonString(uint16_t fgColor)
 {  
   if(oldButtonString.equals(buttonStrDisplayed) && oldSelected && selected)
   {
@@ -84,7 +82,7 @@ void SaveLocation::printButtonString(uint16_t fgColor)
    tft.println      (buttonStrDisplayed);
 }
 
-void SaveLocation::doClick()
+void SaveLocationJB::doClick()
 {
       if (buttonStrDisplayed.equals("save" )) {saveFile  () ;}
  else if (buttonStrDisplayed.equals("load" )) {loadFile  () ;}
@@ -97,29 +95,29 @@ void SaveLocation::doClick()
 /**
 populates the displayString String
 */
-void SaveLocation::makeDisplayString()
+void SaveLocationJB::makeDisplayString()
 {
    displayString = String(tojMl, 1) + String("ml ") + (utils.makeDratString(deemsRatio)) + String(" ") +
    String((int)(pgRatio)) + String("/") + String((int)(100-pgRatio));
 }
 
-void SaveLocation::setDisplayString(String displayStringIn)
+void SaveLocationJB::setDisplayString(String displayStringIn)
 {
    displayString = displayStringIn;
    if((displayString.equals(""))){isEmpty = true;}
 }
 
-void SaveLocation::printButtonString()
+void SaveLocationJB::printButtonString()
 {
     printButtonString (ST77XX_BLUE);
 }
 
-void SaveLocation::loadFile()
+void SaveLocationJB::loadFile()
 {         
       if (displayString.equals(jb_SaveScreenHndlr.currentSettingsString)) 
       { 
          String msgStr = "Saved settings already loaded!";
-         jb_SaveScreenHndlr.setStatusMessage(msgStr);
+         jb_SaveScreenHndlr.setStatusMessage(msgStr, &Roboto_Condensed_Italic_17);
          return; 
       } //trying to load what's already loaded
 
@@ -128,10 +126,10 @@ void SaveLocation::loadFile()
       valuesJB.pgRatio    = pgRatio    ;
       animateButtonProgressBar()       ;
       String msgStr=String("Settings loaded from M") + String (filename.substring(2,3));
-      jb_SaveScreenHndlr.setStatusMessage(msgStr);
+      jb_SaveScreenHndlr.setStatusMessage(msgStr, &Roboto_Condensed_Italic_17);
 }
 
-void SaveLocation::animateButtonProgressBar()
+void SaveLocationJB::animateButtonProgressBar()
 {
    for(int pos=250; pos<314; ++pos)
       {
@@ -144,14 +142,14 @@ void SaveLocation::animateButtonProgressBar()
       }
 }
 
-void SaveLocation::setCursorForButtonString()
+void SaveLocationJB::setCursorForButtonString()
 {
         if (buttonStrDisplayed.equals("save" )) {tft.setCursor(263,  yPos-3); }
    else if (buttonStrDisplayed.equals("load" )) {tft.setCursor(265,  yPos-2); }
    else if (buttonStrDisplayed.equals("clear")) {tft.setCursor(262,  yPos-2); }
 }
 
-void SaveLocation::printDisplayString(boolean animate)
+void SaveLocationJB::printDisplayString(boolean animate)
 {
    if (displayString.equals(oldDisplayString)) {return;}
    oldDisplayString = displayString;
@@ -172,9 +170,9 @@ void SaveLocation::printDisplayString(boolean animate)
    }
 }
 
-void SaveLocation::deleteFile()
+void SaveLocationJB::deleteFile()
 {
    littleFS.deleteFile(filename); 
    String msgStr=String("M") + String (filename.substring(2,3)) + String(" cleared");
-   jb_SaveScreenHndlr.setStatusMessage(msgStr);
+   jb_SaveScreenHndlr.setStatusMessage(msgStr, &Roboto_Condensed_Italic_17);
 }
