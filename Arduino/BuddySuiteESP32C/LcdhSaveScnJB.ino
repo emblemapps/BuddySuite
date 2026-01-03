@@ -1,7 +1,10 @@
-//26Dec2025
+//03Jan2026
 void JB_SaveLcdH::setupScreen(CurrentValuesJB & valuesJB)
 {
         tft.setRotation  (1);
+        #ifdef INVERT_DISPLAY
+		tft.setRotation(3);
+		#endif
 		tft.fillScreen   (colorTextBG_darkBlue);
         tft.setCursor    ((xMarginRightPixels-4), 54);
         tft.setTextColor (ST77XX_YELLOW, colorTextBG_darkBlue);
@@ -11,8 +14,8 @@ void JB_SaveLcdH::setupScreen(CurrentValuesJB & valuesJB)
         printCurrentSettingsString(valuesJB, false);
         tft.setFont      (&Open_Sans_Italic_23); 	// https://oleddisplay.squix.ch/
         tft.drawRoundRect(0,  0, tft.width(), tft.height(), 10, colorText1);  //yellow border line
-        tft.drawRGBBitmap(51, 8, saveIcon26x26, 26,26);
-        tft.setCursor    (88, 28);
+        tft.drawRGBBitmap(58, 8, saveIcon26x26, 26,26);
+        tft.setCursor    (92, 28);
         tft.setTextColor (colorText2, colorTextBG_darkBlue);
         tft.println      ("Save/Load Juice");
         tft.drawRoundRect(248, 60, 	67, 25, 7, ST77XX_BLUE); //back button
@@ -119,30 +122,44 @@ void JB_SaveLcdH::joystickMoveX(boolean right)
    }
 }
 
-void JB_SaveLcdH::setStatusMessage(String & message)
+void JB_SaveLcdH::setStatusMessage(String & message, const GFXfont *f)
 {
     statusMessage = message;
+    this->statusMessageFont = f;
 }
 
 unsigned long timeStatusMessageFirstDisplayed=0;
 boolean messageDisplayed=false;
+String oldMessage = "";
+//Called every couple of ms from JBmain, prints any non empty message for 2 secs, after which it overwrites with a dark blue square
 void JB_SaveLcdH::printStatusMessage()
 {
-        if (statusMessage.equals("")){messageDisplayed=false;return;} //no message, return
+        if (statusMessage.equals("")){messageDisplayed=false; return;} //no message, return
         //if we get here we must have a non-empty message to display with messageDisplayed true or false (not yet printed)
-        if(!messageDisplayed) //display message once at the start
-        {  
+        if((!messageDisplayed) || (!statusMessage.equals(oldMessage))) //display message once at the start or replace if new message different to old
+        {   
             messageDisplayed = true;
             timeStatusMessageFirstDisplayed = millis(); 
             tft.setTextColor (ST77XX_ORANGE, colorTextBG_darkBlue);
-            tft.setCursor    (7, 78);
-            tft.setFont      (&Roboto_Condensed_Italic_17);
+            uint8_t yOffsetText = 79;
+            uint8_t xPosRect = 4;  uint8_t xLenRect = 242;
+            if(statusMessageFont==&DSEG14_Modern_Bold_Italic_17) //TIMEOUT MESSAGE BEING PRINTED
+            {
+                    yOffsetText = 83; xPosRect= 130; xLenRect = 36; // a shorter rect is printed to avoid flicker on the TIMEOUT bit
+            }
+            tft.setCursor    (6, yOffsetText);
+            tft.setFont      (statusMessageFont);
+           // if(!statusMessage.equals(oldMessage)){tft.fillRoundRect(4, 62 , 242, 23, 2, colorTextBG_darkBlue);}// colorTextBG_darkBlue);}
+           // ST77XX_ORANGE
+            if(!statusMessage.equals(oldMessage)){tft.fillRoundRect(xPosRect, 62 , xLenRect, 23, 2, colorTextBG_darkBlue);}// colorTextBG_darkBlue);}
+            
             tft.print        (statusMessage);
+            oldMessage =      statusMessage;
         }
         
         if ( (millis()-timeStatusMessageFirstDisplayed) > 2000)
         {
-        tft.fillRoundRect(4, 65, 242, 21, 2, colorTextBG_darkBlue);//colorTextBG_darkBlue);
+        tft.fillRoundRect(4, 62, 242, 23, 2, colorTextBG_darkBlue); //colorTextBG_darkBlue);
         statusMessage="";
         }
 }
