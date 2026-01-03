@@ -1,4 +1,4 @@
-//26Dec2025
+//03Jan2026
 /**
  * Connections
  * ESP32C3  ST7789 Display (currently 320x240)
@@ -11,9 +11,7 @@
  * 3.3V				VCC	red
  * GND				GND	gray
  */
-// #include "SPIFFS.h" 
-// #include <SPIFFS_ImageReader.h> //https://forum.arduino.cc/t/st7789-draw-bmp-files-faster/685758/5
-// #include <FS.h>
+
  void Utils::rightJustifyPad(String & mlStr, int16_t reqLen)
 {
   String spaces(""); String sp(" ");
