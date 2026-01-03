@@ -1,4 +1,4 @@
-//26Dec2025
+//03Jan2026
   // SPI speed defaults to SPI_DEFAULT_FREQ defined in the library, you can override it here
   // Allowable spped depends on chip & wiring Too fast may get you a black screen some times, continuous.
   //tft.setSPISpeed(40000000);
@@ -7,7 +7,6 @@ void JB_LcdHdlr::setupScreen()
 		{		
 				tft.setFont (&Open_Sans_Italic_23);
 			 	// https://oleddisplay.squix.ch/
-				//tft.setRotation(1);
 				tft.fillScreen(colorTextBG_darkBlue);
 				//////////////////////////////////////////////////////////////////////////////////
 				tft.drawRoundRect(0, 0, 	tft.width(), tft.height()-135, 10, ST77XX_YELLOW);  //border line top
@@ -37,13 +36,14 @@ void JB_LcdHdlr::setupScreen()
 
 				tft.setTextColor(ST77XX_CYAN, colorTextBG_darkBlue); 
   			tft.setCursor(xMarginLeftPixels, yOffset); 	tft.print("Total");  
-  			tft.setCursor(xOffsetMg, yOffset);					tft.print("g");
+  			tft.setCursor(xOffsetMg+18, yOffset);					tft.print("g");
   			olubleStrLenPixels = getStringWidthPixels(&Open_Sans_Italic_23, olubleStr);
   			tft.setCursor(tft.width() - xMarginRightPixels - olubleStrLenPixels, yOffset); tft.print(olubleStr);
 
   			quasi_StrLenPixels = getStringWidthPixels(&Open_Sans_Italic_23, quasi_Str); //housekeeping for the solubility display update
   			setSelectedField(0);
 				screenShowing=JB;  //JB, JBSAV
+				xPosMappedOld 				  = 99 ; //somewhere off-screen to force an update at the centre
 		}
 
 void JB_LcdHdlr::updateScreen(CurrentValuesJB & values, boolean updateAllin)  
@@ -195,9 +195,9 @@ void JB_LcdHdlr::setTotalJuiceGramsField(const CurrentValuesJB & values)
 	float totalWeightOfDJuice_g = values.totalWeightOfDJuice_g;
 	String out=String(totalWeightOfDJuice_g,(totalWeightOfDJuice_g>=10?1:2));
 	uint16_t 	strLenPixels = getStringWidthPixels(&Open_Sans_Italic_23,out);
-	uint8_t   rectXlen     = 60;
-	tft.fillRect (xOffsetMg - rectXlen-textToUnitGapPixels,	yOffset-21, rectXlen, 24, colorTextBG_darkBlue); //ST77XX_RED
-  tft.setCursor(xOffsetMg-strLenPixels-textToUnitGapPixels, yOffset); 				tft.print(out);
+	uint8_t   rectXlen     = 75;
+	tft.fillRect (xOffsetMg - rectXlen-textToUnitGapPixels+18,	yOffset-20, rectXlen, 24, colorTextBG_darkBlue); //colorTextBG_darkBlue); //ST77XX_RED
+  tft.setCursor(xOffsetMg-strLenPixels-textToUnitGapPixels+18, yOffset); 				tft.print(out);
 }
 
 // void JB_LcdHdlr::openSaveScreen()
