@@ -1,4 +1,4 @@
-//26Dec2025
+//03Jan2026
 #ifndef HEADER_JoystickReader
 #define HEADER_JoystickReader
 #define JOYSTICK_X_PIN 2     
@@ -32,10 +32,9 @@ class JoystickReader
 			{
 				return isCentredYRaw(analogRead(JOYSTICK_Y_PIN));
 			}
-			
 			boolean isCentredXRaw(int joystickInXRaw)
 			{
-				if(joystickInXRaw<=joystickCentreXRaw-300 || joystickInXRaw>=joystickCentreXRaw+300)
+				if(joystickInXRaw<=joystickCentreXRaw-500 || joystickInXRaw>=joystickCentreXRaw+500)
 				{return false;}
 				return true;
 			}
@@ -103,22 +102,32 @@ class JoystickPushSwitchReader : public JoystickReader
 			void sendPushSwitchNotification();
 			boolean pressedRecently;
 };
-
 #endif
 
 #ifndef HEADER_CurrentValuesJB
 #define HEADER_CurrentValuesJB
 enum Solubility {SOLUBLE, PART_SOLUBLE, NOT_SOLUBLE};
+#define MIN_tojMl 0
+#define MAX_tojMl 50
+#define MIN_PG 0
+#define MAX_PG 100
+#define MIN_DEEMSRATIO 0.5
+#define MAX_DEEMSRATIO 20
 class CurrentValuesJB
 { 
 public: 
+		unsigned long  millisLastChangedtojMl		= 0;
+		unsigned long  millisLastChangeddeemsRatio	= 0;
+		unsigned long  millisLastChangedpgRatio		= 0;
+		unsigned long  LastChangeddeemsMg			= 0;
+		const uint16_t joystickIncrementDelayMillis = 190;
 		void  setTojMl(float tojMl);
 		float getTojMl();
 		float deemsRatio			=0; 	
 		int16_t pgRatio				=0;  //percentage PG
 		float pgMl					=0;
 		float vgMl					=0;
-		int16_t deemsMg				=0;
+		unsigned long deemsMg		=0;
 		float totalWeightOfDJuice_g	=0;
 		float weightPg_g			=0;
 		float weightVg_g			=0;
@@ -164,13 +173,6 @@ class JB_Main
 
 #ifndef HEADER_LcdHdlr
 #define HEADER_LcdHdlr
-//#include <./Pics/picMinty.h>
-//#include <./Pics/picDestiny.h>
-//#include <./Pics/GS850_320x215.h>
-//#include <./fonts/Open_Sans_Italic_21.h> 
-//#include <./fonts/Open_Sans_Italic_16.h> 
-//#include <./fonts/Open_Sans_Italic_23.h> 
-
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
 #define TFT_CS        21
@@ -217,7 +219,7 @@ class JB_LcdHdlr:public LcdHdlr
 		void setSelectedField(uint8_t sel); //0-dJuice Reqd, 1-dRatio g/ml, 2-PG/VG, 3-DMT	
 	private:
 		boolean updateAll = false;
-		const uint8_t xOffsetMg 		  = 148;
+		const uint8_t xOffsetMg 		  = 144;
 		const uint8_t xOffsetMl           = 150;
 		const uint8_t textToUnitGapPixels = 3 ; //eg 1.3<gap>ml
 		uint16_t 	  olubleStrLenPixels  = 0 ; //set in setupScreen()
@@ -262,14 +264,15 @@ class Utils
 class JB_SaveLcdH: public LcdHdlr
 {
 	public:
-		const uint16_t idleScreenTimeout_ms = 30000;
+		const uint16_t idleScreenTimeout_ms = 60000;
 		void setupScreen(CurrentValuesJB & valuesJB);
 		void setSelectedRow(int selectedRow);
 		void joystickMoveX(boolean toRight);
-		void setStatusMessage(String & message);
+		void setStatusMessage(String & message, const GFXfont *f);
 		void doClick();
 		String currentSettingsString=""; 
 		void printStatusMessage();
+		const GFXfont *statusMessageFont;
 	private:
 			String statusMessage="";
 			unsigned long maxIdleDuration =  10 * 1000; //60 secs for now
@@ -298,15 +301,15 @@ class LittleFSManager
 };
 #endif
 
-#ifndef HEADER_SaveLocation
-#define HEADER_SaveLocation
+#ifndef HEADER_SaveLocationJB
+#define HEADER_SaveLocationJB
 //#include <SPIFFS_ImageReader.h> //https://forum.arduino.cc/t/st7789-draw-bmp-files-faster/685758/5
 enum SelectState {SELECTED, UNSELECTED};
-class SaveLocation
+class SaveLocationJB
 {
 	public: 
 			SelectState selectState= UNSELECTED;
-			SaveLocation(String filenameIn, int yPosIn);
+			SaveLocationJB(String filenameIn, int yPosIn);
 			void loadFile();  // sets the three calc variables of the current valuesJb
 			void saveFile();
 			void deleteFile();
@@ -344,5 +347,6 @@ class SaveLocation
 				int xPos=49;
 				
 };
-SaveLocation saveLocations [] = {SaveLocation("jb1.sav", 110), SaveLocation("jb2.sav",140), SaveLocation("jb3.sav", 170), SaveLocation("jb4.sav", 200), SaveLocation("jb5.sav", 230)};
+String ButtonStrings[] = {"save", "load", "clear"};
+SaveLocationJB saveLocations [] = {SaveLocationJB("jb1.sav", 110), SaveLocationJB("jb2.sav",140), SaveLocationJB("jb3.sav", 170), SaveLocationJB("jb4.sav", 200), SaveLocationJB("jb5.sav", 230)};
 #endif
