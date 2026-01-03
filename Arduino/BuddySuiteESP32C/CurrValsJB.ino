@@ -1,9 +1,7 @@
-//26Dec2025
-
-// C:\Users\Rob\Documents\Arduino\libraries\BuddySuiteESP32C3_LibsC:\Users\Rob\Documents\Arduino\libraries\BuddySuiteESP32C3_Libs
+//03Jan2026
 void CurrentValuesJB::setup()
 {
-	  tojMl     = 3; 
+	tojMl     = 3; 
     deemsRatio= 4;
     pgRatio   = 60;
 }
@@ -13,7 +11,6 @@ String CurrentValuesJB::toString()
 	String outStr = utils.makeDRatString(*this);
 	String ret = String(tojMl,1) + String ("ml ") + String(outStr) + String(" " )  
 	+ String(pgRatio) + String("/") + String(100-pgRatio); 
-	//String ret= "hello";
 	return ret;
 }
 
@@ -26,17 +23,6 @@ float CurrentValuesJB::getTojMl()
 {
   return tojMl;
 }
-#define MIN_tojMl 0
-#define MAX_tojMl 50
-#define MIN_PG 0
-#define MAX_PG 100
-#define MIN_DEEMSRATIO 0.5
-#define MAX_DEEMSRATIO 20
-unsigned long  millisLastChangedtojMl				= 0;
-unsigned long  millisLastChangeddeemsRatio	= 0;
-unsigned long  millisLastChangedpgRatio			= 0;
-unsigned long  LastChangeddeemsMg						= 0;
-const uint16_t joystickIncrementDelayMillis = 190;
 
 void CurrentValuesJB::incrementValue (const int & incValueIn, uint8_t selectedField)
 {
@@ -45,9 +31,7 @@ void CurrentValuesJB::incrementValue (const int & incValueIn, uint8_t selectedFi
 	 if(incValue<0) 			{incValue = _max(-10, incValue);}
    else if (incValue>0) {incValue = _min(10, incValue);}
    uint8_t absIncValue = abs(incValue);
-//   boolean hardPush 	 = absIncValue>9;
-//   boolean mediumPush  = absIncValue<=9 && absIncValue>6;
-     boolean pushRight 	 = incValue   >0;
+  boolean pushRight 	 = incValue   >0;
    switch(selectedField)
   	{
     	case 0: if (millisLastChangedtojMl > millis() - joystickIncrementDelayMillis) {break;}
@@ -72,8 +56,4 @@ void CurrentValuesJB::incrementValue (const int & incValueIn, uint8_t selectedFi
             	break;    
   	}
   delay (0);
- ////if ( absIncValue<10) {delay(10);} //so we can knock onto our desired value
- //  if ( absIncValue<8) {delay(50);} //so we can knock onto our desired value
- //  if ( absIncValue<24) {delay(100);} //so we can knock onto our desired value
- //	 delay for 5 = none, for 4=100, 1,2,3 = 200
 }
