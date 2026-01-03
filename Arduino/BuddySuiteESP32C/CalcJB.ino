@@ -1,31 +1,59 @@
-//26Dec2025
-void JB_Calc::setup(){}
+//03Jan2026
+void CurrentValuesJB::setup()
+{
+	  tojMl     = 3; 
+    deemsRatio= 4;
+    pgRatio   = 60;
+}
 
-//float tojMl, deemsRatio, pgRatio, pgMl, vgMl, deemsMg; in AllJuiceBuddy.h
-/** given total djuice, dmt ratio, and pg/vg ratio, calculate pg, vg and dmt weight */  
-void JB_Calc::calculate(CurrentValuesJB & jb_values, boolean Dont_Update_DeemsMg)
-  {
-     float tijMl 		= (jb_values.getTojMl()) / ((0.95 / jb_values.deemsRatio ) + 1.0);
-     jb_values.pgMl = (jb_values.pgRatio/100.0) * tijMl;
-     jb_values.vgMl = tijMl - jb_values.pgMl;
-     if(!Dont_Update_DeemsMg)
-    	{
-        jb_values.deemsMg =  (tijMl*1000)/jb_values.deemsRatio; 
-    	} 
-     float pgSolubilityFactor_gPerMl  = jb_values.deemsMg/(jb_values.pgMl*1000);
-     jb_values.solubility 						= SOLUBLE;
-     if (pgSolubilityFactor_gPerMl>2.0){jb_values.solubility=NOT_SOLUBLE;} //red light
-     else if ((pgSolubilityFactor_gPerMl>1.2) &&  (pgSolubilityFactor_gPerMl<=2.0) && (jb_values.pgRatio<40)) {jb_values.solubility=PART_SOLUBLE;}//red/amber lights
+String CurrentValuesJB::toString()
+{
+	String outStr = utils.makeDRatString(*this);
+	String ret = String(tojMl,1) + String ("ml ") + String(outStr) + String(" " )  
+	+ String(pgRatio) + String("/") + String(100-pgRatio); 
+	return ret;
+}
 
-     jb_values.weightPg_g = jb_values.pgMl * PG_WEIGHTG_PER_ML;
-     jb_values.weightPg_g = (roundf(jb_values.weightPg_g*100))/100.0; //round off to make the total weight field be the sum of the weight fields
-     jb_values.weightVg_g = jb_values.vgMl * VG_WEIGHTG_PER_ML;
-     jb_values.weightVg_g = (roundf(jb_values.weightVg_g*100))/100.0; //round off to make the total weight field be the sum of the weight fields
-     jb_values.totalWeightOfDJuice_g= (jb_values.deemsMg/1000.0) + jb_values.weightPg_g + jb_values.weightVg_g;
-  }
+void CurrentValuesJB::setTojMl(float tojMlin)
+{
+  tojMl=(roundf(tojMlin * 10))/10.0 ; //round to 0.1  
+}
 
-  void JB_Calc::calculateForDeemsWeight(CurrentValuesJB & jb_values)
-  {
-    jb_values.setTojMl((jb_values.deemsMg *(jb_values.deemsRatio + 0.95))/1000.0);
-    calculate(jb_values, true);
-  }
+float CurrentValuesJB::getTojMl()
+{
+  return tojMl;
+}
+
+void CurrentValuesJB::incrementValue (const int & incValueIn, uint8_t selectedField)
+{
+   //0 - dJuice Reqd,  1 - dRatio g/ml, 2 - PG/VG, 3 - Deems
+	 float incValue=incValueIn;
+	 if(incValue<0) 			{incValue = _max(-10, incValue);}
+   else if (incValue>0) {incValue = _min(10, incValue);}
+   uint8_t absIncValue = abs(incValue);
+  boolean pushRight 	 = incValue   >0;
+   switch(selectedField)
+  	{
+    	case 0: if (millisLastChangedtojMl > millis() - joystickIncrementDelayMillis) {break;}
+    					millisLastChangedtojMl = millis();
+    					if(pushRight){tojMl+=((joystickForce==HARD)?1:0.1);} else {tojMl-=((joystickForce==HARD)?1:0.1);}
+            	tojMl = _max(tojMl, MIN_tojMl); tojMl =_min(tojMl, MAX_tojMl);
+            	break;
+    	case 1: if (millisLastChangeddeemsRatio > millis() - joystickIncrementDelayMillis) {break;}
+    					millisLastChangeddeemsRatio = millis();
+    					if(pushRight){deemsRatio+=((joystickForce==HARD)?1:0.1);} else {deemsRatio-=((joystickForce==HARD)?1:0.1);}
+            	deemsRatio= _max(deemsRatio, MIN_DEEMSRATIO); deemsRatio =+ _min(deemsRatio, MAX_DEEMSRATIO);
+            	break;
+    	case 2: if (millisLastChangedpgRatio > millis() - joystickIncrementDelayMillis) {break;}
+    					millisLastChangedpgRatio = millis();
+    					if(pushRight){pgRatio-=((joystickForce==HARD)?10:1);} else {pgRatio+=((joystickForce==HARD)?10:1);}
+            	pgRatio = _max(pgRatio, MIN_tojMl); pgRatio=_min(pgRatio, MAX_PG);
+            	break;
+    	case 3: if (LastChangeddeemsMg > millis() - joystickIncrementDelayMillis) {break;}
+    					LastChangeddeemsMg 		= millis();
+    					if(pushRight) {deemsMg+=((joystickForce==HARD)?100:(joystickForce==MEDIUM)?10:1);} else {deemsMg-=((joystickForce==HARD)?100:(joystickForce==MEDIUM)?10:1);}
+            	deemsMg = _max(deemsMg, 0); deemsMg=_min(deemsMg, 9999);
+            	break;    
+  	}
+  delay (0);
+}
