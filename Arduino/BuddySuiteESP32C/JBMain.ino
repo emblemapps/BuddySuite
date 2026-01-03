@@ -1,4 +1,4 @@
-//26Dec2025
+//03Jan2026
 JBSAV_JoystickReader joystickReaderJBSAV;
 JB_JoystickReader joystickReaderJB; //this order currentVals still isn't seeing joystickreader
 CurrentValuesJB valuesJB;
@@ -38,11 +38,19 @@ void JB_Main::loop()
       if (jb_lcdHandler.screenShowing==JB)    {loopJB()   ;}
  else if (jb_lcdHandler.screenShowing==JBSAV) 
  {
-	 unsigned long durationJBSavScreen =   millis() -  timeJbSAV_Started;
+	 long durationJBSavScreen =   millis() -  timeJbSAV_Started;
 	 if(jsPushSwitchReader.wasPressedRecently()  || joystickReaderJBSAV.wasMovedRecently()) {timeJbSAV_Started=millis();}
-
-	 //Serial.println(String("save screen has been on for ") + String(durationJBSavScreen) + String("ms"));
-	 if(durationJBSavScreen>jb_SaveScreenHndlr.idleScreenTimeout_ms) {jsPushSwitchReader.returnToJuiceBuddyScreen();} 
+	
+	 long time_remaining_til_timeout_secs = (jb_SaveScreenHndlr.idleScreenTimeout_ms - durationJBSavScreen)/1000;
+   if(time_remaining_til_timeout_secs<11)
+	 {
+	 		jb_SaveScreenHndlr.setStatusMessage (String(" TIMEOUT    ") + String ((time_remaining_til_timeout_secs<16 ? "0" : "")) + String(time_remaining_til_timeout_secs), &DSEG14_Modern_Bold_Italic_17);
+ 	 }
+	if(durationJBSavScreen>jb_SaveScreenHndlr.idleScreenTimeout_ms)
+	{
+		jsPushSwitchReader.returnToJuiceBuddyScreen();
+		return;	
+	} 
 	 loopJBSav();
  }
 }
@@ -86,8 +94,6 @@ for (int16_t f=30; f>-1; f-=1)
      	jb_lcdHandler.updateScreen(valuesJB, false);
      	delay (200);
 	}
-
-
 	//djuice req'd test
 	for (float f=0; f<90; f+=0.9)
 	{
@@ -96,7 +102,6 @@ for (int16_t f=30; f>-1; f-=1)
      	jb_lcdHandler.updateScreen(valuesJB, false);
      	delay (200);
 	}
-	
 }
 
 //void printValues()
